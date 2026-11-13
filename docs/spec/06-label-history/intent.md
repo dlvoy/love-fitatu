@@ -9,7 +9,8 @@ reuse an entry or find out what went wrong.
 
 - Each capture creates an entry: the photo plus a TOML file with three sections:
   - `[meta]`: when it was taken, the photo file, the model, provider and catering used, and `error` if
-    reading failed;
+    reading failed, plus the tokens and cost of the read (see
+    [12](../12-usage-and-cost/intent.md));
   - `[detected]`: what the model read;
   - `[saved]`: what the user sent on after edits (name, values, meal, date, `saved_at`, `sent_to`,
     `aaps_carbs_g`).

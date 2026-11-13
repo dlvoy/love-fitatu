@@ -54,6 +54,8 @@ import pl.lovefitatu.bridge.data.History
 import pl.lovefitatu.bridge.data.LabelRecord
 import pl.lovefitatu.bridge.ocr.ImagePrep
 import java.io.File
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.IsoFields
@@ -192,15 +194,28 @@ private val keyLabels = mapOf(
     "meal_label" to "Posiłek", "date" to "Data posiłku", "sent_to" to "Wysłano do", "saved_at" to "Zapisano",
     "aaps_carbs_g" to "Węglowodany do AAPS (g)", "taken" to "Zdjęcie z", "model" to "Model",
     "provider" to "Dostawca modelu", "catering" to "Catering",
+    "input_tokens" to "Tokeny wejściowe", "output_tokens" to "Tokeny wyjściowe", "cost_usd" to "Koszt odczytu",
     "photo" to "Plik", "error" to "Błąd",
 )
-private val hiddenKeys = setOf("meal")
+private val hiddenKeys = setOf("meal", "cost_estimated")
+
+/** A cost in USD with up to six decimals; an estimate from the built-in price list is marked as one. */
+fun formatCost(usd: Double, estimated: Boolean): String {
+    val rounded = BigDecimal(usd).setScale(6, RoundingMode.HALF_UP)
+    val amount = when {
+        rounded.signum() == 0 && usd > 0 -> "< 0,000001"
+        rounded.signum() == 0 -> "0"
+        else -> rounded.stripTrailingZeros().toPlainString().replace('.', ',')
+    }
+    return if (estimated) "≈ $amount USD (szacunek)" else "$amount USD"
+}
 
 /** Rows shown for one TOML section: (label, value), numbers written with a decimal comma. */
 fun detailRows(section: Map<String, Any>): List<Pair<String, String>> =
     section.filterKeys { it !in hiddenKeys }.map { (key, value) ->
-        (keyLabels[key] ?: key) to when (value) {
-            is Double -> value.toString().removeSuffix(".0").replace('.', ',')
+        (keyLabels[key] ?: key) to when {
+            key == "cost_usd" && value is Number -> formatCost(value.toDouble(), section["cost_estimated"] == true)
+            value is Double -> value.toString().removeSuffix(".0").replace('.', ',')
             else -> value.toString().replace('T', ' ')
         }
     }

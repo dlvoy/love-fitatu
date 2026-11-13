@@ -35,4 +35,5 @@ and model list, so switching back and forth loses nothing.
 
 ## Out of scope
 
-- Custom base URLs or self-hosted models, using several providers for one photo, showing prices.
+- Custom base URLs or self-hosted models, using several providers for one photo. What a read
+  costs is covered by [12 Usage and cost](../12-usage-and-cost/intent.md).

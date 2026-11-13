@@ -2,8 +2,16 @@ package pl.lovefitatu.bridge.ocr
 
 import pl.lovefitatu.bridge.R
 
-/** [rawReply] is what the provider sent back; [httpCode] is set when it answered with an HTTP error. */
-class LlmException(message: String, val rawReply: String? = null, val httpCode: Int? = null) : Exception(message)
+/**
+ * [rawReply] is what the provider sent back; [httpCode] is set when it answered with an HTTP error;
+ * [usage] is set when the reply was billed although the app could not use it.
+ */
+class LlmException(
+    message: String,
+    val rawReply: String? = null,
+    val httpCode: Int? = null,
+    val usage: LlmUsage? = null,
+) : Exception(message)
 
 /**
  * A service that runs vision models. [preferred] is shown on top of the model picker and

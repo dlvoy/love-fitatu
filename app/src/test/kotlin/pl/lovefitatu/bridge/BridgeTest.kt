@@ -19,7 +19,9 @@ import pl.lovefitatu.bridge.data.Catering
 import pl.lovefitatu.bridge.data.LabelPrompt
 import pl.lovefitatu.bridge.ocr.LabelResult
 import pl.lovefitatu.bridge.ocr.LlmProvider
+import pl.lovefitatu.bridge.ocr.LlmUsage
 import pl.lovefitatu.bridge.ocr.LlmWire
+import pl.lovefitatu.bridge.ocr.ModelPrices
 import pl.lovefitatu.bridge.ocr.ModelCatalog
 import pl.lovefitatu.bridge.ocr.ModelInfo
 import androidx.compose.ui.geometry.Offset
@@ -28,6 +30,7 @@ import pl.lovefitatu.bridge.data.History
 import pl.lovefitatu.bridge.data.Toml
 import pl.lovefitatu.bridge.ui.clampPan
 import pl.lovefitatu.bridge.ui.detailRows
+import pl.lovefitatu.bridge.ui.formatCost
 import pl.lovefitatu.bridge.ui.weekTitle
 import pl.lovefitatu.bridge.ui.canUseTypedId
 import pl.lovefitatu.bridge.ui.filterModels
@@ -298,5 +301,88 @@ class BridgeTest {
         assertTrue(LabelPrompt.forCatering(Catering.CUSTOM, " ").contains(LabelPrompt.CUSTOM_DEFAULT))
         assertEquals(Catering.LOVE, Catering.byId(null))
         assertEquals(Catering.CUSTOM, Catering.byId("custom"))
+    }
+
+    @Test
+    fun usageFromProviderReplies() {
+        fun root(json: String) = Json.parseToJsonElement(json).jsonObject
+
+        // OpenRouter reports the cost itself.
+        val openRouter = root("""{"usage":{"prompt_tokens":1900,"completion_tokens":80,"total_tokens":1980,"cost":0.00077}}""")
+        assertEquals(
+            LlmUsage(1900, 80, 0.00077, costEstimated = false),
+            LlmWire.usage(LlmProvider.OPENROUTER, "google/gemini-2.5-flash", openRouter),
+        )
+        // Without a reported cost OpenRouter has no price table to fall back on.
+        val noCost = root("""{"usage":{"prompt_tokens":10,"completion_tokens":5}}""")
+        assertEquals(LlmUsage(10, 5), LlmWire.usage(LlmProvider.OPENROUTER, "google/gemini-2.5-flash", noCost))
+
+        // The others report tokens only; a "cost" field from them is not trusted.
+        val openAi = root("""{"usage":{"prompt_tokens":2000,"completion_tokens":100,"cost":9.0}}""")
+        val estimated = LlmWire.usage(LlmProvider.OPENAI, "gpt-6-luna", openAi)!!
+        assertEquals(2000L, estimated.inputTokens)
+        assertEquals(100L, estimated.outputTokens)
+        assertEquals(0.00025, estimated.costUsd!!, 1e-12)
+        assertTrue(estimated.costEstimated)
+        assertEquals(LlmUsage(2000, 100), LlmWire.usage(LlmProvider.OPENAI, "some-unknown-model", openAi))
+
+        // Anthropic counts cached input separately.
+        val anthropic = root(
+            """{"usage":{"input_tokens":1500,"cache_creation_input_tokens":300,"cache_read_input_tokens":200,"output_tokens":400}}"""
+        )
+        val claude = LlmWire.usage(LlmProvider.ANTHROPIC, "claude-haiku-5-5", anthropic)!!
+        assertEquals(2000L, claude.inputTokens)
+        assertEquals(400L, claude.outputTokens)
+        assertEquals(0.0004, claude.costUsd!!, 1e-12)
+        assertTrue(claude.costEstimated)
+
+        assertNull(LlmWire.usage(LlmProvider.OPENAI, "gpt-6-luna", root("""{"choices":[]}""")))
+        assertNull(LlmWire.usage(LlmProvider.OPENAI, "gpt-6-luna", root("""{"usage":{}}""")))
+        assertNull(LlmWire.usage(LlmProvider.ANTHROPIC, "claude-haiku-5-5", root("""{"usage":null}""")))
+
+        assertEquals(
+            mapOf("input_tokens" to 2000L, "output_tokens" to 100L, "cost_usd" to 0.00025, "cost_estimated" to true),
+            LlmUsage(2000, 100, 0.00025, costEstimated = true).toToml(),
+        )
+        assertEquals(mapOf("input_tokens" to 10L, "output_tokens" to 5L), LlmUsage(10, 5).toToml())
+    }
+
+    @Test
+    fun costEstimatesFromPriceTable() {
+        // Every preferred model of a provider that reports no cost has a list price.
+        for (provider in LlmProvider.entries.filter { it != LlmProvider.OPENROUTER }) {
+            for (model in provider.preferred) assertTrue("$provider $model", ModelPrices.priceOf(provider, model) != null)
+        }
+        assertEquals(0.1 to 0.5, ModelPrices.priceOf(LlmProvider.ANTHROPIC, "claude-haiku-5-5"))
+        // A date or variant suffix keeps the price; the longest entry wins.
+        assertEquals(1.0 to 5.0, ModelPrices.priceOf(LlmProvider.ANTHROPIC, "claude-haiku-4-5-20251001"))
+        assertEquals(4.0 to 20.0, ModelPrices.priceOf(LlmProvider.ANTHROPIC, "claude-opus-5-5"))
+        assertEquals(5.0 to 25.0, ModelPrices.priceOf(LlmProvider.ANTHROPIC, "claude-opus-5"))
+        assertEquals(30.0 to 180.0, ModelPrices.priceOf(LlmProvider.OPENAI, "gpt-5.5-pro"))
+        assertEquals(0.1 to 0.5, ModelPrices.priceOf(LlmProvider.OPENAI, "gpt-6-luna-pro"))
+        assertEquals(0.17 to 0.25, ModelPrices.priceOf(LlmProvider.TOGETHER, "Qwen/Qwen3.5-9B"))
+        // No guessing across families or providers.
+        assertNull(ModelPrices.priceOf(LlmProvider.OPENAI, "gpt-6-lunar"))
+        assertNull(ModelPrices.priceOf(LlmProvider.OPENAI, "claude-haiku-5-5"))
+        assertNull(ModelPrices.priceOf(LlmProvider.OPENROUTER, "anthropic/claude-haiku-5.5"))
+
+        assertEquals(0.00043, ModelPrices.estimate(LlmProvider.TOGETHER, "Qwen/Qwen3.5-9B", 2000, 360)!!, 1e-12)
+        assertNull(ModelPrices.estimate(LlmProvider.TOGETHER, "unknown/model", 2000, 360))
+    }
+
+    @Test
+    fun detailRowsShowUsageAndCost() {
+        val usage = LlmUsage(1900, 80, 0.000345, costEstimated = true)
+        val meta = Toml.parse(Toml.write(mapOf("meta" to usage.toToml())))["meta"]!!
+        assertEquals(
+            listOf("Tokeny wejściowe" to "1900", "Tokeny wyjściowe" to "80", "Koszt odczytu" to "≈ 0,000345 USD (szacunek)"),
+            detailRows(meta),
+        )
+        assertEquals("0,00077 USD", formatCost(0.00077, estimated = false))
+        assertEquals("0,0125 USD", formatCost(0.0125, estimated = false))
+        assertEquals("0 USD", formatCost(0.0, estimated = false))
+        assertEquals("< 0,000001 USD", formatCost(0.0000002, estimated = false))
+        // Entries without a cost show tokens only.
+        assertEquals(listOf("Tokeny wejściowe" to "10", "Tokeny wyjściowe" to "5"), detailRows(LlmUsage(10, 5).toToml()))
     }
 }

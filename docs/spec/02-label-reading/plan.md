@@ -3,7 +3,8 @@
 ## Components
 
 - `app/src/main/kotlin/pl/lovefitatu/bridge/ocr/LabelReader.kt`: `readLabel(dataUrl)` posts the
-  catering prompt and the image to the active provider, structured first, plain on fallback.
+  catering prompt and the image to the active provider, structured first, plain on fallback. Returns the label with the usage of the call
+  (see [12](../12-usage-and-cost/plan.md)).
   Errors become `LlmException` carrying the raw reply and the HTTP code. Wire formats: see
   [10](../10-llm-providers/plan.md). Prompts: see [11](../11-diet-caterings/plan.md).
 - `app/src/main/kotlin/pl/lovefitatu/bridge/ocr/LabelResult.kt`: the serialisable result, `parse` (finds the outermost `{...}`),

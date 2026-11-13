@@ -343,14 +343,19 @@ class MainActivity : ComponentActivity() {
                 val dataUrl = withContext(Dispatchers.Default) {
                     ImagePrep.toDataUrl(ImagePrep.scaled(photo, ImagePrep.UPLOAD_EDGE))
                 }
-                val result = LabelReader(provider, apiKey, model, prompt).readLabel(dataUrl)
-                record = withContext(Dispatchers.IO) { History.update(record!!, LabelRecord.DETECTED, result.toToml()) }
+                val (result, usage) = LabelReader(provider, apiKey, model, prompt).readLabel(dataUrl)
+                record = withContext(Dispatchers.IO) {
+                    val billed = History.update(record!!, LabelRecord.META, usage?.toToml().orEmpty(), merge = true)
+                    History.update(billed, LabelRecord.DETECTED, result.toToml())
+                }
                 showReview(result, photo, record)
             } catch (e: Exception) {
                 val message = if (e is LlmException) e.message.orEmpty() else "Błąd: ${e.message ?: e.javaClass.simpleName}"
                 error = message + ((e as? LlmException)?.rawReply?.let { "\n\n${it.take(600)}" } ?: "")
+                // A reply the app could not use was still billed, so its usage is kept with the error.
+                val meta = (e as? LlmException)?.usage?.toToml().orEmpty() + mapOf("error" to message)
                 record?.let { r ->
-                    withContext(Dispatchers.IO) { History.update(r, LabelRecord.META, mapOf("error" to message), merge = true) }
+                    withContext(Dispatchers.IO) { History.update(r, LabelRecord.META, meta, merge = true) }
                 }
             } finally {
                 busy = false

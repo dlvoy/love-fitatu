@@ -8,6 +8,12 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-13
+
+### Added
+
+- Each history entry records the tokens used by the label read and its cost in USD, shown in the details dialog. OpenRouter reports the cost; for Anthropic, OpenAI and Together AI it is estimated from list prices and marked as an estimate.
+
 ## [0.1.0] - 2026-11-13
 
 ### Added

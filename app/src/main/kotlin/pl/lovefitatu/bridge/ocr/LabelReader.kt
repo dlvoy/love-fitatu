@@ -9,8 +9,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
@@ -19,6 +21,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.concurrent.TimeUnit
+
+/** What one read produced: the label, and the tokens and cost when the provider reported them. */
+data class LabelReading(val result: LabelResult, val usage: LlmUsage?)
 
 /** Reads a label photo with one provider's model, using the catering-specific [prompt]. */
 class LabelReader(
@@ -32,21 +37,22 @@ class LabelReader(
         .readTimeout(90, TimeUnit.SECONDS)
         .build()
 
-    suspend fun readLabel(imageDataUrl: String): LabelResult = withContext(Dispatchers.IO) {
+    suspend fun readLabel(imageDataUrl: String): LabelReading = withContext(Dispatchers.IO) {
         // Not every model accepts a strict schema (or a temperature), so fall back to a plain request once.
-        val reply = try {
+        val (reply, usage) = try {
             complete(imageDataUrl, structured = true)
         } catch (first: LlmException) {
             if (LlmWire.worthPlainRetry(first.httpCode)) complete(imageDataUrl, structured = false) else throw first
         }
         try {
-            LabelResult.parse(reply)
+            LabelReading(LabelResult.parse(reply), usage)
         } catch (e: Exception) {
-            throw LlmException("Nie udało się odczytać odpowiedzi modelu: ${e.message}", reply)
+            throw LlmException("Nie udało się odczytać odpowiedzi modelu: ${e.message}", reply, usage = usage)
         }
     }
 
-    private fun complete(imageDataUrl: String, structured: Boolean): String {
+    /** The assistant text and the usage the provider reported for it. */
+    private fun complete(imageDataUrl: String, structured: Boolean): Pair<String, LlmUsage?> {
         val anthropic = provider.api == LlmProvider.Api.ANTHROPIC
         val body = if (anthropic) LlmWire.anthropicBody(model, prompt, imageDataUrl, structured)
         else LlmWire.openAiBody(model, prompt, imageDataUrl, structured)
@@ -64,8 +70,10 @@ class LabelReader(
             val root = runCatching { Json.parseToJsonElement(text).jsonObject }.getOrNull()
                 ?: throw LlmException("Nieprawidłowa odpowiedź ${provider.label}", text)
             if (root["error"] is JsonObject) throw LlmException("${provider.label}: ${LlmWire.errorMessage(text)}", text)
-            return (if (anthropic) LlmWire.anthropicReply(root) else LlmWire.openAiReply(root))
-                ?: throw LlmException(LlmWire.emptyReplyMessage(root), text)
+            val usage = LlmWire.usage(provider, model, root)
+            val reply = (if (anthropic) LlmWire.anthropicReply(root) else LlmWire.openAiReply(root))
+                ?: throw LlmException(LlmWire.emptyReplyMessage(root), text, usage = usage)
+            return reply to usage
         }
     }
 }
@@ -185,6 +193,32 @@ object LlmWire {
             else -> "Brak treści w odpowiedzi modelu"
         }
     }
+
+    // ------------------------------------------------------------------ usage
+
+    /**
+     * Tokens and cost of the call, or null when the reply carries no token counts. Only OpenRouter
+     * reports a cost (in credits, which are US dollars); the others are priced from [ModelPrices].
+     */
+    fun usage(provider: LlmProvider, model: String, root: JsonObject): LlmUsage? {
+        val usage = root["usage"] as? JsonObject ?: return null
+        val (input, output) = if (provider.api == LlmProvider.Api.ANTHROPIC) {
+            // input_tokens leaves out tokens written to or read from the prompt cache.
+            val cached = (usage.count("cache_creation_input_tokens") ?: 0) + (usage.count("cache_read_input_tokens") ?: 0)
+            usage.count("input_tokens")?.plus(cached) to usage.count("output_tokens")
+        } else {
+            usage.count("prompt_tokens") to usage.count("completion_tokens")
+        }
+        if (input == null && output == null) return null
+        val inputTokens = input ?: 0
+        val outputTokens = output ?: 0
+        val reported = (usage["cost"] as? JsonPrimitive)?.doubleOrNull
+            ?.takeIf { provider == LlmProvider.OPENROUTER && it.isFinite() && it >= 0 }
+        val cost = reported ?: ModelPrices.estimate(provider, model, inputTokens, outputTokens)
+        return LlmUsage(inputTokens, outputTokens, cost, costEstimated = cost != null && reported == null)
+    }
+
+    private fun JsonObject.count(key: String): Long? = (this[key] as? JsonPrimitive)?.longOrNull?.takeIf { it >= 0 }
 
     /** `data:image/jpeg;base64,AAAA` → (`image/jpeg`, `AAAA`). */
     fun splitDataUrl(dataUrl: String): Pair<String, String> {
