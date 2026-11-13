@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.ocr
+package pl.cukrzycowy.labelbite.ocr
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -59,7 +59,7 @@ class LabelReader(
         val request = Request.Builder()
             .url(provider.completionsUrl)
             .apply { provider.authHeaders(apiKey).forEach { (name, value) -> header(name, value) } }
-            .apply { if (provider == LlmProvider.OPENROUTER) header("X-Title", "Label bridge") }
+            .apply { if (provider == LlmProvider.OPENROUTER) header("X-Title", "LabelBite") }
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
         http.newCall(request).execute().use { response ->

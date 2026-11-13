@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.automation
+package pl.cukrzycowy.labelbite.automation
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
@@ -19,7 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
-import pl.lovefitatu.bridge.data.Settings
+import pl.cukrzycowy.labelbite.data.Settings
 import java.time.format.DateTimeFormatter
 
 /**
@@ -276,7 +276,7 @@ class BridgeAccessibilityService : AccessibilityService() {
     private fun fail(message: String): Nothing = throw StepFailed(message)
 
     companion object {
-        private const val TAG = "LoveFitatuBridge"
+        private const val TAG = "LabelBite"
         private const val EDIT_TEXT = "android.widget.EditText"
         private val DAY_ID = DateTimeFormatter.ofPattern("yyyy_MM_dd")
 

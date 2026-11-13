@@ -9,7 +9,7 @@ plugins {
 }
 
 // The single source of the app version. /commit-tag-push rewrites this line when it cuts a release.
-val appVersion = "0.5.0"
+val appVersion = "0.6.0"
 
 // versionCode is derived from the version: 1.2.3 -> 10203, so it rises with every release.
 val appVersionCode = appVersion.split('.').map(String::toInt).let { (major, minor, patch) ->
@@ -31,11 +31,11 @@ val signingKeystore: String? = System.getenv("SIGNING_KEYSTORE_PATH")?.takeIf { 
 val debugSigningKeystore: String? = System.getenv("DEBUG_SIGNING_KEYSTORE_PATH")?.takeIf { it.isNotBlank() }
 
 android {
-    namespace = "pl.lovefitatu.bridge"
+    namespace = "pl.cukrzycowy.labelbite"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "pl.lovefitatu.bridge"
+        applicationId = "pl.cukrzycowy.labelbite"
         minSdk = 31
         targetSdk = 36
         versionCode = appVersionCode

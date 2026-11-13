@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.data
+package pl.cukrzycowy.labelbite.data
 
 typealias TomlDoc = Map<String, Map<String, Any>>
 

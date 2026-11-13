@@ -13,7 +13,7 @@ $ErrorActionPreference = 'Stop'
 $ScriptDir = $PSScriptRoot
 $Root = Split-Path $ScriptDir -Parent
 $EnvFile = Join-Path $ScriptDir '.env'
-$AppId = 'pl.lovefitatu.bridge'
+$AppId = 'pl.cukrzycowy.labelbite'
 $Apk = Join-Path $Root 'app/build/outputs/apk/debug/app-debug.apk'
 
 function Fail([string]$Message) { Write-Error "error: $Message" -ErrorAction Continue; exit 1 }

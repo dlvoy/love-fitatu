@@ -6,7 +6,7 @@ Releases are built by GitHub Actions (`.github/workflows/release.yml`) whenever 
 1. checks that the tag equals `appVersion` in `app/build.gradle.kts`,
 2. runs the unit tests and builds a signed release APK,
 3. publishes a GitHub release named after the tag, with the matching `CHANGELOG.md` section as
-   its notes and `love-fitatu-vX.Y.Z.apk` attached.
+   its notes and `labelbite-vX.Y.Z.apk` attached.
 
 ## Cutting a release
 

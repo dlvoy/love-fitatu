@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Love → Fitatu: an Android app (Kotlin, Jetpack Compose) that reads a Love Catering meal label with
+LabelBite: an Android app (Kotlin, Jetpack Compose) that reads a Love Catering meal label with
 an OpenRouter vision model and fills Fitatu and the AAPS bolus calculator through an accessibility
 service. See [README.md](README.md) for the overview and build commands, and
 [DEPLOYMENT.md](DEPLOYMENT.md) for releases.

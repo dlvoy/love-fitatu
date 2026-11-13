@@ -2,9 +2,9 @@
 
 ## Components
 
-- `app/src/main/kotlin/pl/lovefitatu/bridge/automation/Jobs.kt`: `AutomationJob.Fitatu`,
+- `app/src/main/kotlin/pl/cukrzycowy/labelbite/automation/Jobs.kt`: `AutomationJob.Fitatu`,
   `AutomationStatus` (last message as a `StateFlow`), `Format.fitatuNumber` / `sameNumber`.
-- `app/src/main/kotlin/pl/lovefitatu/bridge/automation/BridgeAccessibilityService.kt`
+- `app/src/main/kotlin/pl/cukrzycowy/labelbite/automation/BridgeAccessibilityService.kt`
   - `start(jobs)` runs jobs in order on the main dispatcher, one run at a time, 45 s per job,
     reporting through a toast and `AutomationStatus`.
   - `runFitatu` implements the steps against Fitatu's Flutter view ids
@@ -15,9 +15,9 @@
     are never scrolled. `click` refuses nodes outside the Fitatu package.
 - `app/src/main/res/xml/accessibility_service_config.xml`, the manifest `<service>` entry and
   `<queries>` for `com.fitatu.tracker`.
-- `app/src/main/kotlin/pl/lovefitatu/bridge/MainActivity.kt` `run`: shows an error when the service
+- `app/src/main/kotlin/pl/cukrzycowy/labelbite/MainActivity.kt` `run`: shows an error when the service
   is off or a run is already active.
 
-## Tests (`app/src/test/kotlin/pl/lovefitatu/bridge/BridgeTest.kt`)
+## Tests (`app/src/test/kotlin/pl/cukrzycowy/labelbite/BridgeTest.kt`)
 
 - `fitatuNumbers`. The UI driving itself is checked by hand against the installed Fitatu.

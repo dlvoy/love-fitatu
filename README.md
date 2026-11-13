@@ -1,4 +1,4 @@
-# Love → Fitatu
+# LabelBite
 
 An Android app that reads a diet-catering meal label (Love Catering, or your own) from a photo and
 enters its nutrition values into Fitatu and the carbs into the AAPS bolus calculator.

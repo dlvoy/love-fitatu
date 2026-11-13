@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.automation
+package pl.cukrzycowy.labelbite.automation
 
 import android.content.Context
 import android.content.pm.PackageManager

@@ -8,6 +8,13 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-13
+
+### Changed
+
+- The app is now called LabelBite, and its Android package is `pl.cukrzycowy.labelbite` (was `pl.lovefitatu.bridge`). Android treats it as a new app: it installs next to the old one, starts with empty settings and history, and its accessibility service has to be turned on again.
+- The release APK is named `labelbite-vX.Y.Z.apk`.
+
 ## [0.5.0] - 2026-11-13
 
 ### Changed

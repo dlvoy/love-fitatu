@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.ui
+package pl.cukrzycowy.labelbite.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,15 +38,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import pl.lovefitatu.bridge.BuildConfig
-import pl.lovefitatu.bridge.R
-import pl.lovefitatu.bridge.automation.AppVersions
-import pl.lovefitatu.bridge.automation.SteeredApp
-import pl.lovefitatu.bridge.data.Catering
-import pl.lovefitatu.bridge.data.MealMapping
-import pl.lovefitatu.bridge.data.Settings
-import pl.lovefitatu.bridge.ocr.LlmProvider
-import pl.lovefitatu.bridge.ocr.ModelCatalog
+import pl.cukrzycowy.labelbite.BuildConfig
+import pl.cukrzycowy.labelbite.R
+import pl.cukrzycowy.labelbite.automation.AppVersions
+import pl.cukrzycowy.labelbite.automation.SteeredApp
+import pl.cukrzycowy.labelbite.data.Catering
+import pl.cukrzycowy.labelbite.data.MealMapping
+import pl.cukrzycowy.labelbite.data.Settings
+import pl.cukrzycowy.labelbite.ocr.LlmProvider
+import pl.cukrzycowy.labelbite.ocr.ModelCatalog
 
 @Composable
 fun SettingsScreen(

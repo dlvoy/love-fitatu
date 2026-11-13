@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.data
+package pl.cukrzycowy.labelbite.data
 
 import android.content.Context
 import android.graphics.Bitmap

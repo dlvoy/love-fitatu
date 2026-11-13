@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "love-fitatu"
+rootProject.name = "labelbite"
 include(":app")

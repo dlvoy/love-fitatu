@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.ui
+package pl.cukrzycowy.labelbite.ui
 
 import android.util.LruCache
 import androidx.compose.foundation.Image
@@ -50,9 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import pl.lovefitatu.bridge.data.History
-import pl.lovefitatu.bridge.data.LabelRecord
-import pl.lovefitatu.bridge.ocr.ImagePrep
+import pl.cukrzycowy.labelbite.data.History
+import pl.cukrzycowy.labelbite.data.LabelRecord
+import pl.cukrzycowy.labelbite.ocr.ImagePrep
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode

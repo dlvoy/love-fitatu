@@ -9,7 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
-APP_ID="pl.lovefitatu.bridge"
+APP_ID="pl.cukrzycowy.labelbite"
 APK="$ROOT/app/build/outputs/apk/debug/app-debug.apk"
 
 launch=1

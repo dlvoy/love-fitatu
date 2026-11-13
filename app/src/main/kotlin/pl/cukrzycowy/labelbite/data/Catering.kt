@@ -1,6 +1,6 @@
-package pl.lovefitatu.bridge.data
+package pl.cukrzycowy.labelbite.data
 
-import pl.lovefitatu.bridge.R
+import pl.cukrzycowy.labelbite.R
 
 /** A diet catering whose labels the app reads. [tintIcon] is false for full-colour logos. */
 enum class Catering(

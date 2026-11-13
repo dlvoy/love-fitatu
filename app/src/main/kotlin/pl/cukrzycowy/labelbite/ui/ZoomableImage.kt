@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.ui
+package pl.cukrzycowy.labelbite.ui
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
@@ -34,7 +34,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import pl.lovefitatu.bridge.ocr.ImagePrep
+import pl.cukrzycowy.labelbite.ocr.ImagePrep
 import java.io.File
 
 private const val MAX_ZOOM = 8f

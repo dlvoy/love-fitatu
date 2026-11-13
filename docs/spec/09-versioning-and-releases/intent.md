@@ -11,7 +11,7 @@ app.
   derived from it.
 - Pushing a `vX.Y.Z` tag that matches `appVersion` makes GitHub Actions run the unit tests, build a
   signed release APK and publish a GitHub release named after the tag, with the matching
-  `CHANGELOG.md` section as notes and `love-fitatu-vX.Y.Z.apk` attached.
+  `CHANGELOG.md` section as notes and `labelbite-vX.Y.Z.apk` attached.
 - A tag that does not match `appVersion`, or a missing signing secret, fails the workflow.
 - Changes are recorded in `CHANGELOG.md` (Keep a Changelog, Semantic Versioning).
 - The app shows its version, build time and commit in Settings (see

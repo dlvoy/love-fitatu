@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.ui
+package pl.cukrzycowy.labelbite.ui
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
@@ -34,15 +34,15 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import pl.lovefitatu.bridge.automation.AapsGuard
-import pl.lovefitatu.bridge.automation.AutomationJob
-import pl.lovefitatu.bridge.data.DishCode
-import pl.lovefitatu.bridge.data.LabelDate
-import pl.lovefitatu.bridge.data.LabelRecord
-import pl.lovefitatu.bridge.data.Meal
-import pl.lovefitatu.bridge.data.MealMapping
-import pl.lovefitatu.bridge.data.Settings
-import pl.lovefitatu.bridge.ocr.LabelResult
+import pl.cukrzycowy.labelbite.automation.AapsGuard
+import pl.cukrzycowy.labelbite.automation.AutomationJob
+import pl.cukrzycowy.labelbite.data.DishCode
+import pl.cukrzycowy.labelbite.data.LabelDate
+import pl.cukrzycowy.labelbite.data.LabelRecord
+import pl.cukrzycowy.labelbite.data.Meal
+import pl.cukrzycowy.labelbite.data.MealMapping
+import pl.cukrzycowy.labelbite.data.Settings
+import pl.cukrzycowy.labelbite.ocr.LabelResult
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset

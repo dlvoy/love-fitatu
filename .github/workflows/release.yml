@@ -48,7 +48,7 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon testDebugUnitTest assembleRelease
-          cp app/build/outputs/apk/release/app-release.apk "love-fitatu-$GITHUB_REF_NAME.apk"
+          cp app/build/outputs/apk/release/app-release.apk "labelbite-$GITHUB_REF_NAME.apk"
 
       - name: Extract release notes from CHANGELOG.md
         run: |
@@ -65,7 +65,7 @@ jobs:
         with:
           name: ${{ github.ref_name }}
           body_path: release-notes.md
-          files: love-fitatu-${{ github.ref_name }}.apk
+          files: labelbite-${{ github.ref_name }}.apk
 
       - name: Remove the decoded keystore
         if: always()

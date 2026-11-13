@@ -1,7 +1,7 @@
-package pl.lovefitatu.bridge.automation
+package pl.cukrzycowy.labelbite.automation
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import pl.lovefitatu.bridge.data.Meal
+import pl.cukrzycowy.labelbite.data.Meal
 import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.roundToInt

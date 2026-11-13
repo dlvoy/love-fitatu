@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge
+package pl.cukrzycowy.labelbite
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -52,24 +52,24 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import pl.lovefitatu.bridge.automation.AutomationJob
-import pl.lovefitatu.bridge.automation.AutomationStatus
-import pl.lovefitatu.bridge.automation.BridgeAccessibilityService
-import pl.lovefitatu.bridge.automation.SteeredApp
-import pl.lovefitatu.bridge.data.History
-import pl.lovefitatu.bridge.data.LabelRecord
-import pl.lovefitatu.bridge.data.SecureStore
-import pl.lovefitatu.bridge.data.Settings
-import pl.lovefitatu.bridge.ocr.ImagePrep
-import pl.lovefitatu.bridge.ocr.LabelReader
-import pl.lovefitatu.bridge.ocr.LabelResult
-import pl.lovefitatu.bridge.ocr.LlmException
-import pl.lovefitatu.bridge.ui.AccessibilityButton
-import pl.lovefitatu.bridge.ui.Gallery
-import pl.lovefitatu.bridge.ui.RecordDialog
-import pl.lovefitatu.bridge.ui.ReviewData
-import pl.lovefitatu.bridge.ui.ReviewScreen
-import pl.lovefitatu.bridge.ui.SettingsScreen
+import pl.cukrzycowy.labelbite.automation.AutomationJob
+import pl.cukrzycowy.labelbite.automation.AutomationStatus
+import pl.cukrzycowy.labelbite.automation.BridgeAccessibilityService
+import pl.cukrzycowy.labelbite.automation.SteeredApp
+import pl.cukrzycowy.labelbite.data.History
+import pl.cukrzycowy.labelbite.data.LabelRecord
+import pl.cukrzycowy.labelbite.data.SecureStore
+import pl.cukrzycowy.labelbite.data.Settings
+import pl.cukrzycowy.labelbite.ocr.ImagePrep
+import pl.cukrzycowy.labelbite.ocr.LabelReader
+import pl.cukrzycowy.labelbite.ocr.LabelResult
+import pl.cukrzycowy.labelbite.ocr.LlmException
+import pl.cukrzycowy.labelbite.ui.AccessibilityButton
+import pl.cukrzycowy.labelbite.ui.Gallery
+import pl.cukrzycowy.labelbite.ui.RecordDialog
+import pl.cukrzycowy.labelbite.ui.ReviewData
+import pl.cukrzycowy.labelbite.ui.ReviewScreen
+import pl.cukrzycowy.labelbite.ui.SettingsScreen
 import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -144,7 +144,7 @@ class MainActivity : ComponentActivity() {
                                     when {
                                         selecting -> "Zaznaczono: ${selected.size}"
                                         screen == Screen.SETTINGS -> "Ustawienia"
-                                        else -> "Love → Fitatu"
+                                        else -> "LabelBite"
                                     }
                                 )
                             },
@@ -202,7 +202,7 @@ class MainActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize().padding(32.dp),
         ) {
-            Text("Love → Fitatu", style = MaterialTheme.typography.headlineSmall)
+            Text("LabelBite", style = MaterialTheme.typography.headlineSmall)
             Text("Konfiguracja jest zabezpieczona biometrią.")
             lockMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             Button(::promptUnlock) { Text("Odblokuj") }
@@ -263,7 +263,7 @@ class MainActivity : ComponentActivity() {
             return
         }
         BiometricPrompt.Builder(this)
-            .setTitle("Love → Fitatu")
+            .setTitle("LabelBite")
             .setSubtitle("Odblokuj konfigurację i klucz API")
             .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
             .setNegativeButton("Anuluj", mainExecutor) { _, _ -> }

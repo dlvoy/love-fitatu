@@ -72,7 +72,7 @@ as usual. Release signing is separate and described in [DEPLOYMENT.md](DEPLOYMEN
 
 - **`INSTALL_FAILED_UPDATE_INCOMPATIBLE`**: the app on the device was signed with a different key
   (for example a build from Android Studio). Uninstall it first, which deletes its history and
-  settings: `adb uninstall pl.lovefitatu.bridge`.
+  settings: `adb uninstall pl.cukrzycowy.labelbite`.
 - **No device / several devices**: check `adb devices`; set `ANDROID_SERIAL` in `scripts/.env` to
   pick one.
 - **`Gradle requires JVM 17 or later`**: set `JAVA_HOME` in `scripts/.env` to a JDK 17+.

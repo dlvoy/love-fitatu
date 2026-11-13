@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.data
+package pl.cukrzycowy.labelbite.data
 
 import java.text.Normalizer
 import java.time.DayOfWeek

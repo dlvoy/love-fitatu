@@ -1,6 +1,6 @@
-package pl.lovefitatu.bridge.ocr
+package pl.cukrzycowy.labelbite.ocr
 
-import pl.lovefitatu.bridge.R
+import pl.cukrzycowy.labelbite.R
 
 /**
  * [rawReply] is what the provider sent back; [httpCode] is set when it answered with an HTTP error;

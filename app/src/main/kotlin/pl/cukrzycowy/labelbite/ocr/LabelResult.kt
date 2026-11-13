@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.ocr
+package pl.cukrzycowy.labelbite.ocr
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

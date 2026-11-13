@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.ocr
+package pl.cukrzycowy.labelbite.ocr
 
 /**
  * Tokens billed for one label read and what they cost. [costUsd] is null when the provider did not

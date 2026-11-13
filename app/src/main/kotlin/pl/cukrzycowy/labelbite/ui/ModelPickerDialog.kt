@@ -1,4 +1,4 @@
-package pl.lovefitatu.bridge.ui
+package pl.cukrzycowy.labelbite.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import pl.lovefitatu.bridge.ocr.ModelInfo
+import pl.cukrzycowy.labelbite.ocr.ModelInfo
 
 /** Preferred ids for the picker: the provider's fixed ones, then the user's last pick if it is a different model. */
 fun preferredModels(fixed: List<String>, lastPicked: String): List<String> =

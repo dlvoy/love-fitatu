@@ -1,10 +1,10 @@
-package pl.lovefitatu.bridge.data
+package pl.cukrzycowy.labelbite.data
 
 import android.content.Context
-import pl.lovefitatu.bridge.automation.AppVersions
-import pl.lovefitatu.bridge.automation.SteeredApp
-import pl.lovefitatu.bridge.automation.VersionCheck
-import pl.lovefitatu.bridge.ocr.LlmProvider
+import pl.cukrzycowy.labelbite.automation.AppVersions
+import pl.cukrzycowy.labelbite.automation.SteeredApp
+import pl.cukrzycowy.labelbite.automation.VersionCheck
+import pl.cukrzycowy.labelbite.ocr.LlmProvider
 
 /**
  * App configuration. Everything except the model-list caches is kept in [SecureStore], so reads and
