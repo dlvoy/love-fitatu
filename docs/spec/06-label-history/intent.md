@@ -16,7 +16,9 @@ reuse an entry or find out what went wrong.
     `aaps_carbs_g`).
 - The main screen lists entries newest first under two levels of headers, both with a filled
   background: the Monday-based week (**Tydzień 46**, no date range) and, under it, the day (the
-  weekday name, **Poniedziałek**, with the date in a smaller font on the right).
+  weekday name, **Poniedziałek**, with the date in a smaller font on the right). The week header
+  is tinted with the brand colour; the day header is a neutral light grey, so it reads as a
+  separator.
 - The list scrolls endlessly: the newest entries are read first and older ones are read a page at
   a time as the user nears the end.
 - Two views, toggled from the top bar and remembered: a photo grid, or a list with time, meal and

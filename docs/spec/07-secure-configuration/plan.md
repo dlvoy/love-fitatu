@@ -11,7 +11,8 @@
   first build.
 - `app/src/main/kotlin/pl/cukrzycowy/labelbite/MainActivity.kt`: `LockScreen`, `promptUnlock`
   (`BiometricPrompt` with a `CryptoObject`, `BIOMETRIC_STRONG`), `onUnlocked`, the reset-and-warn
-  path when the key is invalidated.
+  path when the key is invalidated. `LockScreen` uses `AppLogo` and `InfoNote` from
+  `ui/AppLogo.kt` and `ic_fingerprint` (Material Icons) on the button.
 - Manifest: `USE_BIOMETRIC`, `android:allowBackup="false"`.
 
 ## Tests

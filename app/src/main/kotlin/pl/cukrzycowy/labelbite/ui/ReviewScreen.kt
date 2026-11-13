@@ -20,7 +20,6 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +38,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import pl.cukrzycowy.labelbite.R
 import pl.cukrzycowy.labelbite.automation.AapsGuard
@@ -259,22 +257,7 @@ fun ReviewScreen(
             )
         }
 
-        val muted = MaterialTheme.colorScheme.outline
-        HorizontalDivider(thickness = 0.5.dp, color = muted)
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Icon(painterResource(R.drawable.ic_info), null, tint = muted, modifier = Modifier.size(14.dp))
-            Text(
-                "W AAPS aplikacja tylko wpisuje węglowodany. Bolus zatwierdzasz samodzielnie.",
-                style = MaterialTheme.typography.labelSmall,
-                color = muted,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-        }
+        InfoNote("W AAPS aplikacja tylko wpisuje węglowodany. Bolus zatwierdzasz samodzielnie.")
     }
 }
 

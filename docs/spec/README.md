@@ -31,3 +31,4 @@ Every intent folder holds three files:
 | 11 | [Diet caterings](11-diet-caterings/intent.md) | done |
 | 12 | [Usage and cost](12-usage-and-cost/intent.md) | done |
 | 13 | [App version check](13-app-version-check/intent.md) | done |
+| 14 | [App icon and branding](14-app-icon-and-branding/intent.md) | done |

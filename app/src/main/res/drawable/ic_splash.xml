@@ -1,0 +1,17 @@
+<!-- The splash screen icon: the launcher artwork at its drawn size, so the whole of it fits the
+     circle the splash screen shows. The shapes of docs/brand/labelbite-icon.svg without its enlargement. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FFFFFF" android:fillType="evenOdd"
+        android:pathData="M34,41H43.52A3,3 0,0 0,44.06 41.36A3,3 0,0 0,44.77 47.08A3,3 0,0 0,47.21 52.32A3,3 0,0 0,51.14 56.54A3,3 0,0 0,56.19 59.33A3,3 0,0 0,61.86 60.44A3,3 0,0 0,62 60.73V75a4,4 0,0 1,-4 4H34a4,4 0,0 1,-4 -4V45a4,4 0,0 1,4 -4zM37,48h3a2,2 0,0 1,2 2v0a2,2 0,0 1,-2 2h-3a2,2 0,0 1,-2 -2v-0a2,2 0,0 1,2 -2zM36.5,60.5h16a1.5,1.5 0,0 1,1.5 1.5v0a1.5,1.5 0,0 1,-1.5 1.5h-16a1.5,1.5 0,0 1,-1.5 -1.5v-0a1.5,1.5 0,0 1,1.5 -1.5zM36.5,66.5h19a1.5,1.5 0,0 1,1.5 1.5v0a1.5,1.5 0,0 1,-1.5 1.5h-19a1.5,1.5 0,0 1,-1.5 -1.5v-0a1.5,1.5 0,0 1,1.5 -1.5zM36.5,72.5h10a1.5,1.5 0,0 1,1.5 1.5v0a1.5,1.5 0,0 1,-1.5 1.5h-10a1.5,1.5 0,0 1,-1.5 -1.5v-0a1.5,1.5 0,0 1,1.5 -1.5z" />
+    <path android:fillColor="#5A2412"
+        android:pathData="M47.4,42a15.1,15.1 0,1 0,30.2 0a15.1,15.1 0,1 0,-30.2 0z" />
+    <path android:fillColor="#9CCC65"
+        android:pathData="M47.08,40.38A15.5,15.5 0,1 1,60.88 57.42L64.97,39.53zM57.3,28.46L59.72,22.19L63.76,27.56zM68.17,28.65L74.26,25.82L73.44,32.49z" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M61.02,39.32L58.13,45.39L56.49,39.53zM56.49,39.53L53.6,45.61L51.96,39.75zM51.96,39.75L49.07,45.83L47.43,39.97zM64.48,43.47L57.99,45.12L63.43,48.03zM63.43,48.03L56.95,49.69L62.39,52.6zM62.39,52.6L55.9,54.25L61.34,57.16z" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M57.42,33.94a4.8,4.8 0,1 0,9.6 0a4.8,4.8 0,1 0,-9.6 0z" />
+    <path android:fillColor="#5A2412"
+        android:pathData="M58.52,34.69a2.4,2.4 0,1 0,4.8 0a2.4,2.4 0,1 0,-4.8 0z" />
+</vector>

@@ -8,7 +8,7 @@
     `carbsForAaps` and `fitatuJob` derive the outputs.
   - `ReviewScreen`: day-choice dialog, date picker, meal chips, number fields, the date row
     (`ic_chevron_left`, `ic_calendar`, `ic_chevron_right`), the two send buttons with
-    `logo_fitatu` and `logo_aaps`, and the muted AAPS note.
+    `logo_fitatu` and `logo_aaps`, and the muted AAPS note (`InfoNote` from `ui/AppLogo.kt`).
 - `app/src/main/res/drawable/logo_fitatu.xml`, `logo_aaps.xml`: single-colour vectors taken from
   the apps themselves (the monochrome layer of the Fitatu launcher icon, cropped to the glyph, and
   the AAPS notification icon), tinted with the button's content colour like the provider logos.

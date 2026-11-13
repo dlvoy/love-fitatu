@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The brand salmon: behind the launcher icon and on the splash screen. Same as Brand in ui/Theme.kt. -->
+    <color name="ic_launcher_background">#F08C4A</color>
+    <!-- The window behind Compose, matching the theme's background so no other colour flashes at start. -->
+    <color name="app_background">#FFF8F5</color>
+</resources>

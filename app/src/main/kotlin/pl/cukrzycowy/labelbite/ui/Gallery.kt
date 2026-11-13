@@ -112,6 +112,9 @@ private fun WeekHeader(weekStart: LocalDate) {
     )
 }
 
+/** A neutral light grey, so a day header reads as a separator and not as another coloured band. */
+private val DayHeaderGrey = Color(0xFFEEEEEE)
+
 /** Second level under a week: the weekday, with its date smaller on the right. */
 @Composable
 private fun DayHeader(date: LocalDate) {
@@ -119,7 +122,7 @@ private fun DayHeader(date: LocalDate) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+            .background(DayHeaderGrey, RoundedCornerShape(8.dp))
             .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
         Text(

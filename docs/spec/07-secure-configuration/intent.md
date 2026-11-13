@@ -13,6 +13,9 @@ a key is set.
   biometric is enrolled); clearing the last key switches it back.
 - In biometric mode the app shows a lock screen and asks for a fingerprint once per app start. The
   store stays open while the process lives, so changing settings needs no further prompt.
+- The lock screen shows the app icon, large and centred, with the app name and the **Odblokuj**
+  button (with a fingerprint icon) under it. At the bottom, below a thin line, a small centred grey
+  note with an info icon says that the configuration is protected by biometrics.
 - If the biometric key can no longer be used (for example a new fingerprint was enrolled), the
   store is wiped and the user is told to enter the configuration again.
 - The app opts out of Android backup.

@@ -8,6 +8,18 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-13
+
+### Added
+
+- LabelBite has its own icon: a friendly monster biting the corner off a label. It is the launcher icon, and it shows on the splash screen, on the lock screen and next to the title on the main screen.
+
+### Changed
+
+- The app is salmon instead of purple: buttons, accents, highlights and backgrounds.
+- Day headers in the history are light grey, so they read as separators under the coloured week header.
+- The lock screen shows the icon large in the centre, the Odblokuj button has a fingerprint icon, and the note about biometric protection moved to the bottom as a small grey line.
+
 ## [0.7.0] - 2026-11-13
 
 ### Added

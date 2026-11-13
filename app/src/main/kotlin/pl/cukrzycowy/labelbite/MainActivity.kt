@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,7 +46,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.content.IntentCompat
@@ -68,7 +71,10 @@ import pl.cukrzycowy.labelbite.ocr.LabelReader
 import pl.cukrzycowy.labelbite.ocr.LabelResult
 import pl.cukrzycowy.labelbite.ocr.LlmException
 import pl.cukrzycowy.labelbite.ui.AccessibilityButton
+import pl.cukrzycowy.labelbite.ui.AppLogo
 import pl.cukrzycowy.labelbite.ui.Gallery
+import pl.cukrzycowy.labelbite.ui.InfoNote
+import pl.cukrzycowy.labelbite.ui.LabelBiteTheme
 import pl.cukrzycowy.labelbite.ui.RecordDetails
 import pl.cukrzycowy.labelbite.ui.ReviewData
 import pl.cukrzycowy.labelbite.ui.ReviewScreen
@@ -126,10 +132,10 @@ class MainActivity : ComponentActivity() {
         if (SecureStore.unlocked) onUnlocked()
 
         setContent {
-            MaterialTheme {
+            LabelBiteTheme {
                 if (!unlocked) {
                     LockScreen()
-                    return@MaterialTheme
+                    return@LabelBiteTheme
                 }
                 val status by AutomationStatus.message.collectAsState()
                 BackHandler(enabled = screen != Screen.MAIN) { screen = Screen.MAIN }
@@ -146,15 +152,21 @@ class MainActivity : ComponentActivity() {
                     topBar = {
                         TopAppBar(
                             title = {
-                                Text(
-                                    when {
-                                        selecting -> "Zaznaczono: ${selected.size}"
-                                        screen == Screen.SETTINGS -> "Ustawienia"
-                                        screen == Screen.DETAILS -> "Szczegóły etykiety"
-                                        screen == Screen.REVIEW -> "Edycja etykiety"
-                                        else -> "LabelBite"
-                                    }
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                ) {
+                                    if (screen == Screen.MAIN && !selecting) AppLogo(36.dp)
+                                    Text(
+                                        when {
+                                            selecting -> "Zaznaczono: ${selected.size}"
+                                            screen == Screen.SETTINGS -> "Ustawienia"
+                                            screen == Screen.DETAILS -> "Szczegóły etykiety"
+                                            screen == Screen.REVIEW -> "Edycja etykiety"
+                                            else -> "LabelBite"
+                                        }
+                                    )
+                                }
                             },
                             navigationIcon = {
                                 if (screen != Screen.MAIN) IconButton({ screen = Screen.MAIN }) {
@@ -227,14 +239,24 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun LockScreen() {
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize().padding(32.dp),
+            modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 32.dp, vertical = 16.dp),
         ) {
-            Text("LabelBite", style = MaterialTheme.typography.headlineSmall)
-            Text("Konfiguracja jest zabezpieczona biometrią.")
-            lockMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            Button(::promptUnlock) { Text("Odblokuj") }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+            ) {
+                // A phone held sideways has little height, so the logo shrinks to leave room for the button.
+                AppLogo(if (LocalConfiguration.current.screenHeightDp < 520) 96.dp else 176.dp)
+                Text("LabelBite", style = MaterialTheme.typography.headlineSmall)
+                lockMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center) }
+                Button(::promptUnlock) {
+                    Icon(painterResource(R.drawable.ic_fingerprint), null, modifier = Modifier.size(20.dp))
+                    Text("Odblokuj", modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+            InfoNote("Konfiguracja jest zabezpieczona biometrią.")
         }
     }
 
