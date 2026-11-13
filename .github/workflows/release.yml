@@ -47,7 +47,7 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon testReleaseUnitTest assembleRelease
+          ./gradlew --no-daemon testDebugUnitTest assembleRelease
           cp app/build/outputs/apk/release/app-release.apk "love-fitatu-$GITHUB_REF_NAME.apk"
 
       - name: Extract release notes from CHANGELOG.md
