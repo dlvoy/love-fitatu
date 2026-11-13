@@ -14,6 +14,10 @@ state buttons in 0.4.0)
   **Gotowe**, model picker as a full screen with a back arrow instead of **Anuluj**. Not yet
   checked by hand on a device.
 
+- **Uprawnienia** card (1.1.0): the accessibility button moved there from **Fitatu i AAPS**,
+  joined by the file access state button and a note on where the history is saved. Built; not yet
+  checked by hand on a device.
+
 ## Known gaps
 
 - The preferred model ids are hard-coded per provider and need updating when a provider renames or

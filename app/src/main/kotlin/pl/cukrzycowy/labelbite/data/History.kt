@@ -2,6 +2,7 @@ package pl.cukrzycowy.labelbite.data
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Environment
 import java.io.File
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -40,8 +41,52 @@ class LabelRecord(val toml: File, val data: TomlDoc) {
 object History {
     val TIME_FILE: DateTimeFormatter = DateTimeFormatter.ofPattern("HH-mm-ss")
 
+    /** The folder in the shared Documents folder that holds the history once all-files access is granted. */
+    const val SHARED_FOLDER = "LabelBite"
+
+    /** True when the app may use [sharedRoot]: all-files access is granted and shared storage is mounted. */
+    fun sharedAvailable(): Boolean =
+        Environment.isExternalStorageManager() && Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
+
+    /** `Documents/LabelBite` on shared storage: survives an uninstall and shows up in file managers. */
+    fun sharedRoot(): File =
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).resolve(SHARED_FOLDER)
+
     /** App-specific external folder (readable over USB/adb), internal storage if that is unavailable. */
-    fun root(context: Context): File = (context.getExternalFilesDir(null) ?: context.filesDir).resolve("labels")
+    fun privateRoot(context: Context): File = (context.getExternalFilesDir(null) ?: context.filesDir).resolve("labels")
+
+    /** Where entries are read and written: the shared folder with all-files access, the app's own without. */
+    fun root(context: Context): File = if (sharedAvailable()) sharedRoot() else privateRoot(context)
+
+    /** Moves entries saved in the app's own folder to the shared one. Does nothing without all-files access. */
+    fun migrate(context: Context): Int = if (sharedAvailable()) moveEntries(privateRoot(context), sharedRoot()) else 0
+
+    /**
+     * Moves the files of every day folder in [from] to the same day folder in [to] and returns how
+     * many were moved. A file whose name is already taken in [to] stays where it is.
+     */
+    fun moveEntries(from: File, to: File): Int {
+        var moved = 0
+        for (day in from.listFiles { f -> f.isDirectory }.orEmpty()) {
+            val target = to.resolve(day.name).apply { mkdirs() }
+            for (file in day.listFiles { f -> f.isFile }.orEmpty()) {
+                val dest = File(target, file.name)
+                if (dest.exists()) continue
+                // A rename can fail between the app's folder and the shared one, so a copy is the fallback.
+                val done = file.renameTo(dest) ||
+                    runCatching { file.copyTo(dest); file.delete() }.onFailure { dest.delete() }.isSuccess
+                if (done) moved++
+            }
+            day.takeIf { it.list()?.isEmpty() == true }?.delete()
+        }
+        return moved
+    }
+
+    /** [record] at its place under the current [root], for an entry that [migrate] moved. */
+    fun relocated(context: Context, record: LabelRecord): LabelRecord {
+        val file = root(context).resolve("${record.toml.parentFile?.name}/${record.toml.name}")
+        return if (file != record.toml && file.exists()) LabelRecord(file, record.data) else record
+    }
 
     /** Saves the photo and a TOML holding only `[meta]`; detection and saved values are added later. */
     fun create(context: Context, photo: Bitmap, taken: LocalDateTime, model: String, provider: String, catering: String): LabelRecord {

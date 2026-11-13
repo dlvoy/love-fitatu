@@ -8,7 +8,11 @@
   refresh counter), `CateringSettings`, `AutomationSettings`, `About`. `AdvancedHeader` is the
   shared **Zaawansowane** toggle. `StateButton` is a full-width button coloured by a `ButtonState`
   (`OK` green, `NEEDED` orange, `BAD` red, `TO_CHECK` yellow); `AccessibilityButton` (also used by
-  `MainActivity`) and `VersionCheckRow` are built on it.
+  `MainActivity`), `StorageButton` and `VersionCheckRow` are built on it. The **Uprawnienia** card
+  is composed in `SettingsScreen` itself from the two permission buttons and the storage note.
+- `app/src/main/kotlin/pl/cukrzycowy/labelbite/MainActivity.kt`: `storageGranted` (read in
+  `onCreate` and `onResume`), `openStorageAccessSettings`
+  (`ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION`, falling back to the list of all apps).
 - `app/src/main/kotlin/pl/cukrzycowy/labelbite/ui/ModelPickerDialog.kt`: `preferredModels`,
   `filterModels`, `canUseTypedId`, the full-screen dialog with a top bar (back arrow, title),
   search and manual id entry.

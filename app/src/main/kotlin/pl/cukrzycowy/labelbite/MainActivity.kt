@@ -8,6 +8,7 @@ import android.hardware.biometrics.BiometricPrompt
 import android.net.Uri
 import android.os.Bundle
 import android.os.CancellationSignal
+import android.os.Environment
 import android.provider.Settings as SystemSettings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -98,6 +99,8 @@ class MainActivity : ComponentActivity() {
     private var busy by mutableStateOf(false)
     private var error by mutableStateOf<String?>(null)
     private var serviceEnabled by mutableStateOf(false)
+    /** All-files access, which puts the history in the shared Documents folder. */
+    private var storageGranted by mutableStateOf(false)
     /** The newest history entries read so far; the gallery asks for more as it is scrolled. */
     private var records by mutableStateOf(emptyList<LabelRecord>())
 
@@ -126,6 +129,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         settings = Settings(this)
         pendingIntent = intent
+        storageGranted = Environment.isExternalStorageManager()
 
         // The store stays unlocked for the life of the process, so a recreated activity skips the prompt.
         if (!SecureStore.unlocked && !SecureStore.isBiometricMode(this)) SecureStore.unlockPlain(this)
@@ -225,7 +229,10 @@ class MainActivity : ComponentActivity() {
                         modifier = base.verticalScroll(rememberScrollState()).padding(16.dp),
                     ) {
                         when (screen) {
-                            Screen.SETTINGS -> SettingsScreen(settings, serviceEnabled, ::openAccessibilitySettings, ::openUrl)
+                            Screen.SETTINGS -> SettingsScreen(
+                                settings, serviceEnabled, storageGranted,
+                                ::openAccessibilitySettings, ::openStorageAccessSettings, ::openUrl,
+                            )
                             Screen.DETAILS -> opened?.let { RecordDetails(it) }
                             else -> review?.let { ReviewScreen(it, settings, status, ::run) }
                         }
@@ -307,6 +314,12 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         serviceEnabled = BridgeAccessibilityService.instance != null
+        // Granted or taken away on a system screen, so it is looked at on every return to the app.
+        val granted = Environment.isExternalStorageManager()
+        if (granted != storageGranted) {
+            storageGranted = granted
+            if (unlocked) reloadHistory()
+        }
         if (!unlocked && !autoPrompted) {
             autoPrompted = true
             promptUnlock()
@@ -466,13 +479,26 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Lists the history again and re-reads as many entries as were shown, at least one page. */
+    /**
+     * Lists the history again and re-reads as many entries as were shown, at least one page. Entries
+     * still in the app's own folder are first moved to the shared one, once all-files access allows it.
+     */
     private fun reloadHistory() {
         lifecycleScope.launch {
             historyLock.withLock {
                 val wanted = maxOf(HISTORY_PAGE, records.size)
-                val (files, loaded) = withContext(Dispatchers.IO) {
-                    History.files(this@MainActivity).let { it to History.load(it.take(wanted)) }
+                // Not while a label is being read: its entry is still written to under its old path.
+                val migrate = !busy
+                val (moved, files, loaded) = withContext(Dispatchers.IO) {
+                    val moved = if (migrate) History.migrate(this@MainActivity) else 0
+                    val files = History.files(this@MainActivity)
+                    Triple(moved, files, History.load(files.take(wanted)))
+                }
+                if (moved > 0) {
+                    // Whatever still points at a moved entry follows it to its new place.
+                    selected = emptySet()
+                    opened = opened?.let { History.relocated(this@MainActivity, it) }
+                    review?.let { data -> data.record = data.record?.let { History.relocated(this@MainActivity, it) } }
                 }
                 historyFiles = files
                 records = loaded
@@ -534,6 +560,16 @@ class MainActivity : ComponentActivity() {
 
     private fun openAccessibilitySettings() {
         startActivity(Intent(SystemSettings.ACTION_ACCESSIBILITY_SETTINGS))
+    }
+
+    /** Opens the system screen that grants this app all-files access. */
+    private fun openStorageAccessSettings() {
+        try {
+            startActivity(Intent(SystemSettings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:$packageName")))
+        } catch (e: android.content.ActivityNotFoundException) {
+            // Some systems only have the list of all apps.
+            startActivity(Intent(SystemSettings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+        }
     }
 
     private companion object {

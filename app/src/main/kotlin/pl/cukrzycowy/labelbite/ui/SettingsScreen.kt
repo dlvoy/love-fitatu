@@ -1,5 +1,6 @@
 package pl.cukrzycowy.labelbite.ui
 
+import android.os.Environment
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import pl.cukrzycowy.labelbite.R
 import pl.cukrzycowy.labelbite.automation.AppVersions
 import pl.cukrzycowy.labelbite.automation.SteeredApp
 import pl.cukrzycowy.labelbite.data.Catering
+import pl.cukrzycowy.labelbite.data.History
 import pl.cukrzycowy.labelbite.data.MealMapping
 import pl.cukrzycowy.labelbite.data.Settings
 import pl.cukrzycowy.labelbite.ocr.LlmProvider
@@ -52,13 +54,29 @@ import pl.cukrzycowy.labelbite.ocr.ModelCatalog
 fun SettingsScreen(
     settings: Settings,
     serviceEnabled: Boolean,
+    storageGranted: Boolean,
     onOpenAccessibility: () -> Unit,
+    onOpenStorageAccess: () -> Unit,
     onOpenUrl: (String) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Section(R.drawable.ic_smart_toy, "Rozpoznawanie etykiety") { LlmSettings(settings, onOpenUrl) }
         Section(R.drawable.ic_restaurant, "Catering dietetyczny") { CateringSettings(settings, onOpenUrl) }
-        Section(R.drawable.ic_tune, "Fitatu i AAPS") { AutomationSettings(settings, serviceEnabled, onOpenAccessibility) }
+        Section(R.drawable.ic_tune, "Fitatu i AAPS") { AutomationSettings(settings) }
+        Section(R.drawable.ic_lock, "Uprawnienia") {
+            AccessibilityButton(serviceEnabled, onOpenAccessibility)
+            StorageButton(storageGranted, onOpenStorageAccess)
+            Text(
+                if (storageGranted) "Zdjęcia etykiet i ich dane są zapisywane w pamięci urządzenia, w folderze " +
+                    "${Environment.DIRECTORY_DOCUMENTS}/${History.SHARED_FOLDER}."
+                else "Bez dostępu do plików zdjęcia etykiet i ich dane zostają w folderze aplikacji " +
+                    "(Android/data/${BuildConfig.APPLICATION_ID}/files/labels) i znikają po jej odinstalowaniu. " +
+                    "Po włączeniu dostępu zostaną przeniesione do " +
+                    "${Environment.DIRECTORY_DOCUMENTS}/${History.SHARED_FOLDER}.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Section(R.drawable.ic_info, "O aplikacji") { About() }
     }
 }
@@ -208,7 +226,7 @@ private fun CateringSettings(settings: Settings, onOpenUrl: (String) -> Unit) {
 }
 
 @Composable
-private fun AutomationSettings(settings: Settings, serviceEnabled: Boolean, onOpenAccessibility: () -> Unit) {
+private fun AutomationSettings(settings: Settings) {
     var autoSave by remember { mutableStateOf(settings.autoSave) }
     var aapsPackage by remember { mutableStateOf(settings.aapsPackage) }
     var advanced by remember { mutableStateOf(false) }
@@ -217,7 +235,6 @@ private fun AutomationSettings(settings: Settings, serviceEnabled: Boolean, onOp
         Text("Automatycznie naciśnij Zapisz w Fitatu", modifier = Modifier.weight(1f))
         Switch(autoSave, { autoSave = it; settings.autoSave = it })
     }
-    AccessibilityButton(serviceEnabled, onOpenAccessibility)
     VersionCheckRow(settings, SteeredApp.FITATU, Settings.FITATU_PACKAGE)
     VersionCheckRow(settings, SteeredApp.AAPS, aapsPackage.trim().ifBlank { Settings.DEFAULT_AAPS_PACKAGE })
     AdvancedHeader(advanced) { advanced = !advanced }
@@ -328,6 +345,19 @@ fun AccessibilityButton(enabled: Boolean, onClick: () -> Unit) {
     StateButton(
         state = if (enabled) ButtonState.OK else ButtonState.NEEDED,
         text = if (enabled) "Usługa ułatwień dostępu włączona" else "Włącz usługę ułatwień dostępu",
+        onClick = onClick,
+    )
+}
+
+/**
+ * Shows whether the app has all-files access, which puts the label history in the shared Documents
+ * folder, and opens the system screen that grants it: green while granted, orange while not.
+ */
+@Composable
+private fun StorageButton(granted: Boolean, onClick: () -> Unit) {
+    StateButton(
+        state = if (granted) ButtonState.OK else ButtonState.NEEDED,
+        text = if (granted) "Dostęp do plików włączony" else "Zezwól na dostęp do plików",
         onClick = onClick,
     )
 }

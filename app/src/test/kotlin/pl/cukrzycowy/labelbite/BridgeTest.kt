@@ -191,6 +191,32 @@ class BridgeTest {
     }
 
     @Test
+    fun historyMoveKeepsDayFoldersAndExistingFiles() {
+        val base = java.nio.file.Files.createTempDirectory("labelbite").toFile()
+        try {
+            val from = base.resolve("from")
+            val to = base.resolve("to")
+            fun put(root: java.io.File, path: String, text: String) =
+                root.resolve(path).apply { parentFile!!.mkdirs() }.writeText(text)
+            put(from, "2026-11-12/08-00-00.toml", "new")
+            put(from, "2026-11-12/08-00-00.jpg", "photo")
+            put(from, "2026-11-13/09-30-00.toml", "left")
+            put(to, "2026-11-13/09-30-00.toml", "kept")
+
+            assertEquals(2, History.moveEntries(from, to))
+            assertEquals("new", to.resolve("2026-11-12/08-00-00.toml").readText())
+            assertEquals("photo", to.resolve("2026-11-12/08-00-00.jpg").readText())
+            assertFalse(from.resolve("2026-11-12").exists())
+            // A name already taken is not overwritten, and the file that lost stays where it was.
+            assertEquals("kept", to.resolve("2026-11-13/09-30-00.toml").readText())
+            assertEquals("left", from.resolve("2026-11-13/09-30-00.toml").readText())
+            assertEquals(0, History.moveEntries(base.resolve("missing"), to))
+        } finally {
+            base.deleteRecursively()
+        }
+    }
+
+    @Test
     fun historyWeeksStartOnMondayNewestFirst() {
         val days = listOf("2026-11-15", "2026-11-12", "2026-11-09", "2026-11-08").map(LocalDate::parse)
         val weeks = History.byWeek(days) { it }

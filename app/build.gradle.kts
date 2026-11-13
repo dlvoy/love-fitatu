@@ -9,7 +9,7 @@ plugins {
 }
 
 // The single source of the app version. /commit-tag-push rewrites this line when it cuts a release.
-val appVersion = "1.0.0"
+val appVersion = "1.1.0"
 
 // versionCode is derived from the version: 1.2.3 -> 10203, so it rises with every release.
 val appVersionCode = appVersion.split('.').map(String::toInt).let { (major, minor, patch) ->

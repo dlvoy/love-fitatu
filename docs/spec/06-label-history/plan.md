@@ -5,7 +5,13 @@
 - `app/src/main/kotlin/pl/cukrzycowy/labelbite/data/History.kt`: `LabelRecord` (photo, `taken` from
   the path, `dishName`, `mealLabel`) and `History` (`create`, `update` with a stable section order,
   `files` listing every entry's TOML newest first without reading it, `load` reading a slice of
-  them, `takenOf`, `delete` removing empty day folders, `weekStart`, `byWeek`, `byDay`).
+  them, `takenOf`, `delete` removing empty day folders, `weekStart`, `byWeek`, `byDay`). Storage:
+  `sharedAvailable` (all-files access and mounted storage), `sharedRoot` (`Documents/LabelBite`),
+  `privateRoot` (the app's own folder), `root` choosing between them, `migrate` and the plain-file
+  `moveEntries` behind it (rename, with copy and delete as the fallback), `relocated` to re-point
+  a record at its moved file.
+- `app/src/main/AndroidManifest.xml`: `MANAGE_EXTERNAL_STORAGE`. `minSdk` is 31, so this one
+  permission covers every supported Android version.
 - `app/src/main/kotlin/pl/cukrzycowy/labelbite/data/Toml.kt`: writer and parser for the small TOML
   subset used (sections, strings, integers, floats, booleans).
 - `app/src/main/kotlin/pl/cukrzycowy/labelbite/ui/Gallery.kt`: `Gallery` (grid or list by week and
@@ -19,8 +25,11 @@
   `Settings.galleryGrid` holds the view. Paging: `historyFiles` is the full file list, `records`
   the part read so far; `reloadHistory` re-reads as many entries as were shown (at least
   `HISTORY_PAGE`, 60) and `loadMoreHistory` appends the next page, both under `historyLock`.
+  `reloadHistory` calls `History.migrate` first (skipped while `busy`) and, when files moved,
+  re-points `opened` and the open review's record and clears the selection. `onResume` compares
+  `Environment.isExternalStorageManager()` with `storageGranted` and reloads on a change.
 
 ## Tests (`app/src/test/kotlin/pl/cukrzycowy/labelbite/BridgeTest.kt`)
 
 - `tomlRoundTrip`, `historyWeeksStartOnMondayNewestFirst`, `historyDaysWithinWeekNewestFirst`,
-  `detailRowsLabelAndFormat`
+  `detailRowsLabelAndFormat`, `historyMoveKeepsDayFoldersAndExistingFiles`

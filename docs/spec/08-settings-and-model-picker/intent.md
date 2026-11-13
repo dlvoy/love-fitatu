@@ -27,13 +27,21 @@ Settings is a column of titled cards, each with an icon:
 - **Fitatu i AAPS**
   - **Automatycznie naciśnij Zapisz w Fitatu** (auto-save, on by default; see
     [04](../04-fitatu-quick-add/intent.md)).
+  - A version state button for Fitatu and one for AAPS: green, red or yellow
+    (see [13](../13-app-version-check/intent.md)).
+  - **Zaawansowane**, collapsed by default: **Pakiet AAPS**, the AAPS package name.
+- **Uprawnienia**
   - The accessibility service button: one button that shows the state and opens the system
     accessibility settings. Orange with a warning icon and **Włącz usługę ułatwień dostępu** while
     the service is off, green with a check mark and **Usługa ułatwień dostępu włączona** while it
     is on. The main screen shows the orange button while the service is off.
-  - A version state button for Fitatu and one for AAPS, in the same style: green, red or yellow
-    (see [13](../13-app-version-check/intent.md)).
-  - **Zaawansowane**, collapsed by default: **Pakiet AAPS**, the AAPS package name.
+  - The file access button, in the same style: orange with **Zezwól na dostęp do plików** while
+    all-files access is missing, green with **Dostęp do plików włączony** once it is granted.
+    Tapping it opens the system screen for this app's all-files access. The state is read again
+    whenever the user comes back to the app.
+  - A line under the buttons says where label photos and their data are saved now (see
+    [06](../06-label-history/intent.md)). File access is optional, so the main screen does not
+    nag about it.
 - **O aplikacji**: copyright, version name and code, build time and git commit.
 
 Model picker:

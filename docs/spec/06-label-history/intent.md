@@ -35,8 +35,17 @@ reuse an entry or find out what went wrong.
 
 ## Constraints
 
-- Stored under the app's external files folder (`.../files/labels/YYYY-MM-DD/HH-mm-ss.jpg` and
-  `.toml`), readable over USB or adb; internal storage if external is unavailable.
+- With all-files access (granted from Settings, see
+  [08](../08-settings-and-model-picker/intent.md)) entries are stored on shared storage in
+  `Documents/LabelBite/YYYY-MM-DD/HH-mm-ss.jpg` and `.toml`, where a file manager sees them and
+  they survive an uninstall.
+- Without it the app keeps working and stores them in its own external files folder
+  (`Android/data/<package>/files/labels/YYYY-MM-DD/...`, readable over USB or adb; internal storage
+  if external is unavailable).
+- Once access is granted, the entries in the app's own folder are moved to `Documents/LabelBite`,
+  keeping their day folders. A file whose name is already taken there is left where it is; nothing
+  is overwritten. The move waits while a label is being read.
+- The app never asks for the permission on its own; the user grants it from Settings.
 - The entry's time comes from the folder and file names, so a damaged TOML still sorts correctly.
 - Two captures in the same second get a `-2`, `-3`, ... suffix.
 

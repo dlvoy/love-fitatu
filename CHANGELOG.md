@@ -8,6 +8,18 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-13
+
+### Added
+
+- Label photos and their data can be kept in the Documents/LabelBite folder on the phone's shared storage, where a file manager sees them and they survive an uninstall. This needs file access, granted from Settings; without it they stay in the app's own folder as before.
+- Labels already saved in the app's own folder are moved to Documents/LabelBite once file access is granted.
+- Settings have an Uprawnienia section with a file access button that shows whether access is granted and opens the system screen for it, and a note on where labels are saved.
+
+### Changed
+
+- The accessibility service button moved from the Fitatu i AAPS section to the new Uprawnienia section.
+
 ## [1.0.0] - 2026-11-13
 
 ### Added
