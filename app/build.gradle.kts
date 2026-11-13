@@ -26,6 +26,10 @@ val buildTime: String = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatt
 // Release signing comes from environment variables; see DEPLOYMENT.md. Without them the release APK is unsigned.
 val signingKeystore: String? = System.getenv("SIGNING_KEYSTORE_PATH")?.takeIf { it.isNotBlank() }
 
+// Optional debug signing, set by scripts/run-debug.* from scripts/.env; see BUILDING.md. Without it the
+// debug APK is signed with the default Android debug key.
+val debugSigningKeystore: String? = System.getenv("DEBUG_SIGNING_KEYSTORE_PATH")?.takeIf { it.isNotBlank() }
+
 android {
     namespace = "pl.lovefitatu.bridge"
     compileSdk = 37
@@ -48,9 +52,18 @@ android {
             keyAlias = System.getenv("SIGNING_KEY_ALIAS")
             keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
         }
+        if (debugSigningKeystore != null) create("localDebug") {
+            storeFile = file(debugSigningKeystore)
+            storePassword = System.getenv("DEBUG_SIGNING_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("DEBUG_SIGNING_KEY_ALIAS")
+            keyPassword = System.getenv("DEBUG_SIGNING_KEY_PASSWORD")
+        }
     }
 
     buildTypes {
+        debug {
+            if (debugSigningKeystore != null) signingConfig = signingConfigs.getByName("localDebug")
+        }
         release {
             if (signingKeystore != null) signingConfig = signingConfigs.getByName("release")
         }

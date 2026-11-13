@@ -7,3 +7,6 @@ local.properties
 *.jks
 *.keystore
 keystore.b64
+
+# Local signing settings for scripts/run-debug.*
+scripts/.env
