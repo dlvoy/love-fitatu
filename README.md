@@ -21,7 +21,7 @@ Every photo and what was read from it is kept in the in-app history.
   [Anthropic](https://platform.claude.com/settings/keys),
   [OpenAI](https://platform.openai.com/api-keys),
   [Together AI](https://api.together.ai/settings/api-keys)
-- Fitatu and, optionally, AAPS installed
+- Fitatu 4.17.0 or newer and, optionally, AAPS 4.0.0 or newer installed
 - The app's accessibility service turned on (Settings → Accessibility)
 
 ## Setup
@@ -33,7 +33,7 @@ Open **Settings** in the app and set:
 - **Catering**: Love Catering, or **Własny** (custom), where you describe your label for the model.
 - Under **Zaawansowane**, **Code letter = meal**: maps the letter in the dish code (e.g.
   `10284/K/M`) to a Fitatu meal, by default `Ś=breakfast, O=dinner, P=snack, K=supper`.
-- **AAPS package**, if yours differs from the default.
+- **AAPS package** (under Zaawansowane), if yours differs from the default.
 
 The configuration and API key can be locked behind biometrics.
 

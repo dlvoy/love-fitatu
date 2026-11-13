@@ -23,9 +23,13 @@ Settings is a column of titled cards, each with an icon:
 - **Fitatu i AAPS**
   - **Automatycznie naciśnij Zapisz w Fitatu** (auto-save, on by default; see
     [04](../04-fitatu-quick-add/intent.md)).
-  - **Pakiet AAPS**: the AAPS package name.
-  - Accessibility service state and a button to the system accessibility settings. The main screen
-    also shows that button while the service is off.
+  - The accessibility service button: one button that shows the state and opens the system
+    accessibility settings. Orange with a warning icon and **Włącz usługę ułatwień dostępu** while
+    the service is off, green with a check mark and **Usługa ułatwień dostępu włączona** while it
+    is on. The main screen shows the orange button while the service is off.
+  - **Sprawdź wersję Fitatu** and **Sprawdź wersję AAPS**, each with its last result underneath
+    (see [13](../13-app-version-check/intent.md)).
+  - **Zaawansowane**, collapsed by default: **Pakiet AAPS**, the AAPS package name.
 - **O aplikacji**: copyright, version name and code, build time and git commit.
 
 Model picker:

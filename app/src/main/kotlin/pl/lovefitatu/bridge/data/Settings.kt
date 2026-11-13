@@ -1,6 +1,8 @@
 package pl.lovefitatu.bridge.data
 
 import android.content.Context
+import pl.lovefitatu.bridge.automation.SteeredApp
+import pl.lovefitatu.bridge.automation.VersionCheck
 import pl.lovefitatu.bridge.ocr.LlmProvider
 
 /**
@@ -88,6 +90,11 @@ class Settings(context: Context) {
     var aapsPackage: String
         get() = SecureStore["aaps_package"] ?: DEFAULT_AAPS_PACKAGE
         set(value) = SecureStore.put(context, "aaps_package", value.trim().ifBlank { null })
+
+    /** Last version check of [app], or null when it was never checked. */
+    fun versionCheck(app: SteeredApp): VersionCheck? = VersionCheck.decode(SecureStore[app.storageKey])
+
+    fun setVersionCheck(app: SteeredApp, check: VersionCheck) = SecureStore.put(context, app.storageKey, check.encode())
 
     /** History view: photo grid when true, list with details when false. */
     var galleryGrid: Boolean

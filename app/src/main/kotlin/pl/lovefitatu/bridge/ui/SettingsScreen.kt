@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -31,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -38,6 +41,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import pl.lovefitatu.bridge.BuildConfig
 import pl.lovefitatu.bridge.R
+import pl.lovefitatu.bridge.automation.AppVersions
+import pl.lovefitatu.bridge.automation.SteeredApp
 import pl.lovefitatu.bridge.data.Catering
 import pl.lovefitatu.bridge.data.MealMapping
 import pl.lovefitatu.bridge.data.Settings
@@ -190,16 +195,7 @@ private fun CateringSettings(settings: Settings, onOpenUrl: (String) -> Unit) {
         minLines = 4,
         modifier = Modifier.fillMaxWidth(),
     )
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().clickable { advanced = !advanced }.padding(vertical = 8.dp),
-    ) {
-        Text("Zaawansowane", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-        Icon(
-            painterResource(if (advanced) R.drawable.ic_expand_less else R.drawable.ic_expand_more),
-            if (advanced) "Zwiń" else "Rozwiń",
-        )
-    }
+    AdvancedHeader(advanced) { advanced = !advanced }
     if (advanced) OutlinedTextField(
         value = mapping,
         onValueChange = { mapping = it; settings.setMealMapping(catering, it) },
@@ -216,23 +212,51 @@ private fun CateringSettings(settings: Settings, onOpenUrl: (String) -> Unit) {
 private fun AutomationSettings(settings: Settings, serviceEnabled: Boolean, onOpenAccessibility: () -> Unit) {
     var autoSave by remember { mutableStateOf(settings.autoSave) }
     var aapsPackage by remember { mutableStateOf(settings.aapsPackage) }
+    var advanced by remember { mutableStateOf(false) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("Automatycznie naciśnij Zapisz w Fitatu", modifier = Modifier.weight(1f))
         Switch(autoSave, { autoSave = it; settings.autoSave = it })
     }
-    OutlinedTextField(
+    AccessibilityButton(serviceEnabled, onOpenAccessibility)
+    VersionCheckRow(settings, SteeredApp.FITATU, Settings.FITATU_PACKAGE)
+    VersionCheckRow(settings, SteeredApp.AAPS, aapsPackage.trim().ifBlank { Settings.DEFAULT_AAPS_PACKAGE })
+    AdvancedHeader(advanced) { advanced = !advanced }
+    if (advanced) OutlinedTextField(
         value = aapsPackage,
         onValueChange = { aapsPackage = it; settings.aapsPackage = it },
         label = { Text("Pakiet AAPS") },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
     )
-    Text(
-        if (serviceEnabled) "Usługa ułatwień dostępu: włączona" else "Usługa ułatwień dostępu: wyłączona",
-        color = if (serviceEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-    )
-    OutlinedButton(onOpenAccessibility, modifier = Modifier.fillMaxWidth()) { Text("Otwórz ustawienia ułatwień dostępu") }
+}
+
+/** A button that checks the installed version of [app], with the last result under it. */
+@Composable
+private fun VersionCheckRow(settings: Settings, app: SteeredApp, packageName: String) {
+    val context = LocalContext.current
+    var stored by remember(app) { mutableStateOf(settings.versionCheck(app)) }
+    // A result for another package (the AAPS package was changed since) says nothing about this one.
+    val check = stored?.takeIf { it.packageName == packageName }
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        OutlinedButton(
+            onClick = { stored = AppVersions.check(context, app, packageName).also { settings.setVersionCheck(app, it) } },
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Sprawdź wersję ${app.label}") }
+        val small = MaterialTheme.typography.bodySmall
+        if (check == null) Text(
+            "Jeszcze nie sprawdzono." + (app.minVersion?.let { " Wymagana wersja $it lub nowsza." } ?: ""),
+            style = small, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        ) else Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            val color = if (check.ok) StateGreen else MaterialTheme.colorScheme.error
+            Icon(
+                painterResource(if (check.ok) R.drawable.ic_check_circle else R.drawable.ic_warning), null,
+                tint = color, modifier = Modifier.size(16.dp),
+            )
+            Text("${check.describe(app)} · sprawdzono ${check.checkedAt()}", style = small, color = color)
+        }
+    }
 }
 
 @Composable
@@ -260,6 +284,46 @@ private fun Section(icon: Int, title: String, content: @Composable ColumnScope.(
             }
             content()
         }
+    }
+}
+
+/** The header of a collapsible group of rarely changed settings. */
+@Composable
+private fun AdvancedHeader(expanded: Boolean, onToggle: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(vertical = 8.dp),
+    ) {
+        Text("Zaawansowane", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+        Icon(
+            painterResource(if (expanded) R.drawable.ic_expand_less else R.drawable.ic_expand_more),
+            if (expanded) "Zwiń" else "Rozwiń",
+        )
+    }
+}
+
+private val StateGreen = Color(0xFF2E7D32)
+private val StateOrange = Color(0xFFE65100)
+
+/**
+ * Shows the state of the accessibility service and opens its system settings: green with a check
+ * mark while the service is on, orange with a warning while it still has to be turned on.
+ */
+@Composable
+fun AccessibilityButton(enabled: Boolean, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = if (enabled) StateGreen else StateOrange, contentColor = Color.White),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Icon(
+            painterResource(if (enabled) R.drawable.ic_check_circle else R.drawable.ic_warning), null,
+            modifier = Modifier.size(20.dp),
+        )
+        Text(
+            if (enabled) "Usługa ułatwień dostępu włączona" else "Włącz usługę ułatwień dostępu",
+            modifier = Modifier.padding(start = 8.dp),
+        )
     }
 }
 

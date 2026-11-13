@@ -25,6 +25,8 @@ The result, or the reason for stopping, is shown as a toast and on the bridge ap
 - Abort if the planner ends up on a different day after scrolling.
 - Abort if the opened meal is not the requested one.
 - The whole job times out after 45 s.
+- Fitatu must be version 4.17.0 or newer; an older one is refused before it is opened (see
+  [13](../13-app-version-check/intent.md)).
 
 ## Constraints
 

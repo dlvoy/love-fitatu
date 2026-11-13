@@ -30,3 +30,4 @@ Every intent folder holds three files:
 | 10 | [LLM providers](10-llm-providers/intent.md) | done |
 | 11 | [Diet caterings](11-diet-caterings/intent.md) | done |
 | 12 | [Usage and cost](12-usage-and-cost/intent.md) | done |
+| 13 | [App version check](13-app-version-check/intent.md) | done |

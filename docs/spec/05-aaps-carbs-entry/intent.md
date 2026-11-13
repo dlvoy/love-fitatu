@@ -23,6 +23,8 @@ job fails, the message says how many grams to type by hand.
 - Never click a node whose subtree has a confirm-like label (`OK`, `Potwierdź`, `Zatwierdź`,
   `Confirm`, `Podaj`, `Deliver`, `Wyślij`, `Send`), nor any node not labelled as the calculator.
 - Carbs must be 1–120 g; anything else is refused before AAPS is opened.
+- AAPS must be version 4.0.0 or newer; an older one is refused before it is opened (see
+  [13](../13-app-version-check/intent.md)).
 
 ## Out of scope
 

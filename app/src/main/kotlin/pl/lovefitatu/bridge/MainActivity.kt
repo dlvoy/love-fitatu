@@ -52,9 +52,11 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pl.lovefitatu.bridge.automation.AppVersions
 import pl.lovefitatu.bridge.automation.AutomationJob
 import pl.lovefitatu.bridge.automation.AutomationStatus
 import pl.lovefitatu.bridge.automation.BridgeAccessibilityService
+import pl.lovefitatu.bridge.automation.SteeredApp
 import pl.lovefitatu.bridge.data.History
 import pl.lovefitatu.bridge.data.LabelRecord
 import pl.lovefitatu.bridge.data.SecureStore
@@ -63,6 +65,7 @@ import pl.lovefitatu.bridge.ocr.ImagePrep
 import pl.lovefitatu.bridge.ocr.LabelReader
 import pl.lovefitatu.bridge.ocr.LabelResult
 import pl.lovefitatu.bridge.ocr.LlmException
+import pl.lovefitatu.bridge.ui.AccessibilityButton
 import pl.lovefitatu.bridge.ui.Gallery
 import pl.lovefitatu.bridge.ui.RecordDialog
 import pl.lovefitatu.bridge.ui.ReviewData
@@ -228,9 +231,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun Notices() {
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (!serviceEnabled && screen != Screen.SETTINGS) OutlinedButton(
-            ::openAccessibilitySettings, modifier = Modifier.fillMaxWidth(),
-        ) { Text("Włącz usługę ułatwień dostępu (wymagana do Fitatu/AAPS)") }
+        if (!serviceEnabled && screen != Screen.SETTINGS) AccessibilityButton(false, ::openAccessibilitySettings)
     }
 
     override fun onResume() {
@@ -406,9 +407,11 @@ class MainActivity : ComponentActivity() {
         error = null
         val service = BridgeAccessibilityService.instance
         serviceEnabled = service != null
-        val started = service?.start(jobs) == true
+        val versionProblem = if (service == null) null else jobs.firstNotNullOfOrNull(::versionProblem)
+        val started = versionProblem == null && service?.start(jobs) == true
         when {
             service == null -> error = "Usługa ułatwień dostępu jest wyłączona."
+            versionProblem != null -> error = versionProblem
             !started -> error = "Poprzednia automatyzacja jeszcze trwa."
         }
         // Record what the user settled on, whether or not the hand-off could start.
@@ -417,6 +420,21 @@ class MainActivity : ComponentActivity() {
         val sentTo = jobs.joinToString("+") { if (it is AutomationJob.Fitatu) "fitatu" else "aaps" }.takeIf { started }
         data.record = History.update(record, LabelRecord.SAVED, data.savedToml(sentTo))
         reloadHistory()
+    }
+
+    /**
+     * Looks at the installed version of the app [job] is about to steer. The check on record is
+     * replaced when it no longer describes what is installed: never checked, another package, or the
+     * app was updated since. Returns the reason the app must not be steered, or null when it may.
+     */
+    private fun versionProblem(job: AutomationJob): String? {
+        val (app, pkg) = when (job) {
+            is AutomationJob.Fitatu -> SteeredApp.FITATU to Settings.FITATU_PACKAGE
+            is AutomationJob.Aaps -> SteeredApp.AAPS to job.packageName
+        }
+        val check = AppVersions.check(this, app, pkg)
+        if (settings.versionCheck(app)?.sameFinding(check) != true) settings.setVersionCheck(app, check)
+        return if (check.ok) null else "Przerwano: ${check.describe(app)}."
     }
 
     private fun openUrl(url: String) {

@@ -6,6 +6,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pl.lovefitatu.bridge.automation.AapsGuard
+import pl.lovefitatu.bridge.automation.AppVersions
+import pl.lovefitatu.bridge.automation.SteeredApp
+import pl.lovefitatu.bridge.automation.VersionCheck
 import pl.lovefitatu.bridge.automation.Format
 import pl.lovefitatu.bridge.data.DishCode
 import pl.lovefitatu.bridge.data.LabelDate
@@ -36,6 +39,8 @@ import pl.lovefitatu.bridge.ui.canUseTypedId
 import pl.lovefitatu.bridge.ui.filterModels
 import pl.lovefitatu.bridge.ui.preferredModels
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 class BridgeTest {
 
@@ -115,6 +120,48 @@ class BridgeTest {
         assertTrue(AapsGuard.validCarbs(17))
         assertFalse(AapsGuard.validCarbs(0))
         assertFalse(AapsGuard.validCarbs(121))
+    }
+
+    @Test
+    fun appVersionComparison() {
+        for (version in listOf("4.0.0", "4.0", "4", "4.0.0-dev", "4.0.0.1", "4.1.3", "10.0.0", " 4.0.1 ")) {
+            assertTrue(version, AppVersions.atLeast(version, "4.0.0"))
+        }
+        for (version in listOf("3.3.2.1", "3.9.99", "3", "", "dev", "v4.0.0")) {
+            assertFalse(version, AppVersions.atLeast(version, "4.0.0"))
+        }
+    }
+
+    @Test
+    fun appVersionCheckResult() {
+        val pkg = "info.nightscout.androidaps"
+        val fitatuPkg = "com.fitatu.tracker"
+        val good = AppVersions.evaluate(SteeredApp.AAPS, pkg, "4.0.1", 100, 5)
+        assertTrue(good.ok)
+        val old = AppVersions.evaluate(SteeredApp.AAPS, pkg, "3.3.2", 100, 5)
+        assertFalse(old.ok)
+        assertTrue(old.describe(SteeredApp.AAPS).contains("wymagana wersja 4.0.0"))
+        val missing = AppVersions.evaluate(SteeredApp.AAPS, pkg, null, 0, 5)
+        assertFalse(missing.ok)
+        assertTrue(missing.describe(SteeredApp.AAPS).contains("nie jest zainstalowane"))
+        val fitatu = AppVersions.evaluate(SteeredApp.FITATU, fitatuPkg, "4.17.3", 100, 5)
+        assertTrue(fitatu.ok)
+        assertTrue(AppVersions.evaluate(SteeredApp.FITATU, fitatuPkg, "4.18.0", 100, 5).ok)
+        assertFalse(AppVersions.evaluate(SteeredApp.FITATU, fitatuPkg, "4.16.9", 100, 5).ok)
+        assertFalse(AppVersions.evaluate(SteeredApp.FITATU, fitatuPkg, "", 100, 5).ok)
+
+        // A later look that finds the same install keeps the record; an update or another package replaces it.
+        assertTrue(good.sameFinding(good.copy(at = 99)))
+        assertFalse(good.sameFinding(good.copy(updatedAt = 200)))
+        assertFalse(good.sameFinding(good.copy(version = "4.0.2")))
+        assertFalse(good.sameFinding(good.copy(packageName = "other.aaps")))
+        assertFalse(good.sameFinding(old))
+
+        for (check in listOf(good, old, missing, fitatu)) assertEquals(check, VersionCheck.decode(check.encode()))
+        assertNull(VersionCheck.decode(null))
+        assertNull(VersionCheck.decode("garbage"))
+        val at = LocalDateTime.of(2026, 11, 13, 14, 2).toInstant(ZoneOffset.UTC).toEpochMilli()
+        assertEquals("13.11.2026 14:02", VersionCheck(pkg, "4.0.0", 100, true, at).checkedAt(ZoneOffset.UTC))
     }
 
     @Test

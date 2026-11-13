@@ -8,6 +8,18 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-13
+
+### Added
+
+- Settings can check the installed versions of Fitatu and AAPS and shows the last result with its time. The check also runs before the app steers Fitatu or AAPS, and is recorded again after either is updated.
+
+### Changed
+
+- Fitatu older than 4.17.0 and AAPS older than 4.0.0 are refused: the run stops before the app is opened.
+- The accessibility service state and the button to its settings are now one button: orange while the service is off, green with a check mark while it is on.
+- The AAPS package setting moved under an advanced section.
+
 ## [0.2.0] - 2026-11-13
 
 ### Added
