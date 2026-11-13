@@ -60,9 +60,9 @@ import pl.lovefitatu.bridge.data.LabelRecord
 import pl.lovefitatu.bridge.data.SecureStore
 import pl.lovefitatu.bridge.data.Settings
 import pl.lovefitatu.bridge.ocr.ImagePrep
+import pl.lovefitatu.bridge.ocr.LabelReader
 import pl.lovefitatu.bridge.ocr.LabelResult
-import pl.lovefitatu.bridge.ocr.OpenRouterClient
-import pl.lovefitatu.bridge.ocr.OpenRouterException
+import pl.lovefitatu.bridge.ocr.LlmException
 import pl.lovefitatu.bridge.ui.Gallery
 import pl.lovefitatu.bridge.ui.RecordDialog
 import pl.lovefitatu.bridge.ui.ReviewData
@@ -319,31 +319,36 @@ class MainActivity : ComponentActivity() {
 
     private fun process(uri: Uri) {
         error = null
-        if (settings.apiKey.isBlank()) {
-            error = "Najpierw ustaw klucz API OpenRouter."
+        // Read once, so a settings change while the photo is processed cannot mix providers.
+        val provider = settings.provider
+        val apiKey = settings.apiKeyFor(provider)
+        val model = settings.modelFor(provider)
+        val catering = settings.catering
+        val prompt = settings.labelPrompt
+        if (apiKey.isBlank()) {
+            error = "Najpierw ustaw klucz API ${provider.label}."
             screen = Screen.SETTINGS
             return
         }
         busy = true
         screen = Screen.MAIN
         val taken = LocalDateTime.now()
-        val model = settings.model
         lifecycleScope.launch {
             var record: LabelRecord? = null
             try {
                 // The photo goes into history before the model is asked, so a failed read is kept too.
                 val photo = withContext(Dispatchers.IO) { ImagePrep.load(this@MainActivity, uri, ImagePrep.STORED_EDGE) }
-                record = withContext(Dispatchers.IO) { History.create(this@MainActivity, photo, taken, model) }
+                record = withContext(Dispatchers.IO) { History.create(this@MainActivity, photo, taken, model, provider.id, catering.id) }
                 reloadHistory()
                 val dataUrl = withContext(Dispatchers.Default) {
                     ImagePrep.toDataUrl(ImagePrep.scaled(photo, ImagePrep.UPLOAD_EDGE))
                 }
-                val result = OpenRouterClient(settings.apiKey, model).readLabel(dataUrl)
+                val result = LabelReader(provider, apiKey, model, prompt).readLabel(dataUrl)
                 record = withContext(Dispatchers.IO) { History.update(record!!, LabelRecord.DETECTED, result.toToml()) }
                 showReview(result, photo, record)
             } catch (e: Exception) {
-                val message = if (e is OpenRouterException) e.message.orEmpty() else "Błąd: ${e.message ?: e.javaClass.simpleName}"
-                error = message + ((e as? OpenRouterException)?.rawReply?.let { "\n\n${it.take(600)}" } ?: "")
+                val message = if (e is LlmException) e.message.orEmpty() else "Błąd: ${e.message ?: e.javaClass.simpleName}"
+                error = message + ((e as? LlmException)?.rawReply?.let { "\n\n${it.take(600)}" } ?: "")
                 record?.let { r ->
                     withContext(Dispatchers.IO) { History.update(r, LabelRecord.META, mapOf("error" to message), merge = true) }
                 }

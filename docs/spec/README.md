@@ -27,3 +27,5 @@ Every intent folder holds three files:
 | 07 | [Secure configuration](07-secure-configuration/intent.md) | done |
 | 08 | [Settings and model picker](08-settings-and-model-picker/intent.md) | done |
 | 09 | [Versioning and releases](09-versioning-and-releases/intent.md) | done |
+| 10 | [LLM providers](10-llm-providers/intent.md) | done |
+| 11 | [Diet caterings](11-diet-caterings/intent.md) | done |

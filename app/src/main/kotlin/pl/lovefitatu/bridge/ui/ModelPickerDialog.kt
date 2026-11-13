@@ -23,12 +23,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import pl.lovefitatu.bridge.ocr.ModelCatalog
 import pl.lovefitatu.bridge.ocr.ModelInfo
 
-/** Preferred ids for the picker: the fixed ones, then the user's last pick if it is a different model. */
-fun preferredModels(lastPicked: String): List<String> =
-    (ModelCatalog.PREFERRED + lastPicked).filter { it.isNotBlank() }.distinct()
+/** Preferred ids for the picker: the provider's fixed ones, then the user's last pick if it is a different model. */
+fun preferredModels(fixed: List<String>, lastPicked: String): List<String> =
+    (fixed + lastPicked).filter { it.isNotBlank() }.distinct()
+
+/** A typed model id can be used as is when it looks like an id and the list does not have it. */
+fun canUseTypedId(typed: String, matches: List<ModelInfo>): Boolean =
+    typed.isNotEmpty() && typed.none { it.isWhitespace() } && matches.none { it.id == typed }
 
 fun filterModels(models: List<ModelInfo>, query: String): List<ModelInfo> {
     val q = query.trim()
@@ -40,6 +43,8 @@ fun filterModels(models: List<ModelInfo>, query: String): List<ModelInfo> {
 fun ModelPickerDialog(
     models: List<ModelInfo>,
     selected: String,
+    preferred: List<String>,
+    allLabel: String,
     lastPicked: String,
     notice: String?,
     onPick: (String) -> Unit,
@@ -64,21 +69,20 @@ fun ModelPickerDialog(
                 LazyColumn(Modifier.weight(1f).padding(top = 8.dp)) {
                     if (query.isBlank()) {
                         item { SectionLabel("Preferowane") }
-                        items(preferredModels(lastPicked)) { id ->
+                        items(preferredModels(preferred, lastPicked)) { id ->
                             ModelRow(id, byId[id]?.name, id == selected) { onPick(id) }
                         }
                         item { HorizontalDivider(Modifier.padding(vertical = 8.dp)) }
-                        item { SectionLabel("Wszystkie modele z obsługą obrazów (${models.size})") }
+                        item { SectionLabel("$allLabel (${models.size})") }
                         items(models, key = { it.id }) { ModelRow(it.id, it.name, it.id == selected) { onPick(it.id) } }
                     } else {
                         val matches = filterModels(models, query)
                         items(matches, key = { it.id }) { ModelRow(it.id, it.name, it.id == selected) { onPick(it.id) } }
                         val typed = query.trim()
                         // Lets a model id be entered by hand when the list is missing or out of date.
-                        if ('/' in typed && matches.none { it.id == typed }) item {
-                            ModelRow(typed, "Użyj wpisanego id", typed == selected) { onPick(typed) }
-                        }
-                        if (matches.isEmpty() && '/' !in typed) item { SectionLabel("Brak wyników") }
+                        val usable = canUseTypedId(typed, matches)
+                        if (usable) item { ModelRow(typed, "Użyj wpisanego id", typed == selected) { onPick(typed) } }
+                        if (matches.isEmpty() && !usable) item { SectionLabel("Brak wyników") }
                     }
                 }
                 TextButton(onDismiss, modifier = Modifier.align(Alignment.End).padding(horizontal = 8.dp)) { Text("Anuluj") }

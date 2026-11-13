@@ -2,15 +2,15 @@
 
 ## Goal
 
-Keep the OpenRouter API key and the rest of the configuration encrypted, and behind a biometric
-once a key is set.
+Keep the provider API keys and the rest of the configuration encrypted, and behind a biometric once
+a key is set.
 
 ## Behaviour
 
-- All settings except the public model list cache live in one encrypted store.
+- All settings except the public model list caches live in one encrypted store.
 - While no API key is set, the store is encrypted but opens without a prompt.
-- Setting an API key switches the store to biometric protection (when a strong biometric is
-  enrolled); clearing the key switches it back.
+- Setting an API key for any provider switches the store to biometric protection (when a strong
+  biometric is enrolled); clearing the last key switches it back.
 - In biometric mode the app shows a lock screen and asks for a fingerprint once per app start. The
   store stays open while the process lives, so changing settings needs no further prompt.
 - If the biometric key can no longer be used (for example a new fingerprint was enrolled), the

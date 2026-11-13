@@ -1,10 +1,14 @@
 package pl.lovefitatu.bridge.data
 
 import android.content.Context
+import pl.lovefitatu.bridge.ocr.LlmProvider
 
 /**
- * App configuration. Everything except the model-list cache is kept in [SecureStore], so reads and
+ * App configuration. Everything except the model-list caches is kept in [SecureStore], so reads and
  * writes are only valid once the store is unlocked.
+ *
+ * Each LLM provider and each catering has its own values. OpenRouter and Love Catering use the
+ * storage keys of the first release, so its configuration carries over; the others add a suffix.
  */
 class Settings(context: Context) {
     private val context = context.applicationContext
@@ -15,30 +19,71 @@ class Settings(context: Context) {
         this.context.deleteSharedPreferences("settings")
     }
 
-    /** Setting a key turns on biometric protection of the whole configuration; clearing it turns it off. */
-    var apiKey: String
-        get() = SecureStore["api_key"].orEmpty()
-        set(value) {
-            SecureStore.put(context, "api_key", value.trim().ifEmpty { null })
-            SecureStore.setBiometric(context, value.isNotBlank())
-        }
+    private fun key(base: String, provider: LlmProvider) =
+        if (provider == LlmProvider.OPENROUTER) base else "${base}_${provider.id}"
 
-    var model: String
-        get() = SecureStore["model"] ?: DEFAULT_MODEL
-        set(value) = SecureStore.put(context, "model", value.trim().ifBlank { null })
+    private fun key(base: String, catering: Catering) =
+        if (catering == Catering.LOVE) base else "${base}_${catering.id}"
+
+    // ---------------------------------------------------------- LLM provider
+
+    var provider: LlmProvider
+        get() = LlmProvider.byId(SecureStore["provider"])
+        set(value) = SecureStore.put(context, "provider", value.id)
+
+    fun apiKeyFor(provider: LlmProvider): String = SecureStore[key("api_key", provider)].orEmpty()
+
+    /** Biometric protection of the whole configuration is on while any provider has a key. */
+    fun setApiKey(provider: LlmProvider, value: String) {
+        SecureStore.put(context, key("api_key", provider), value.trim().ifEmpty { null })
+        SecureStore.setBiometric(context, LlmProvider.entries.any { apiKeyFor(it).isNotBlank() })
+    }
+
+    fun modelFor(provider: LlmProvider): String = SecureStore[key("model", provider)] ?: provider.defaultModel
+
+    fun setModel(provider: LlmProvider, value: String) =
+        SecureStore.put(context, key("model", provider), value.trim().ifBlank { null })
 
     /** Last model the user picked from the list; shown in the picker's preferred section. */
-    var lastPickedModel: String
-        get() = SecureStore["last_picked_model"].orEmpty()
-        set(value) = SecureStore.put(context, "last_picked_model", value)
+    fun lastPickedModelFor(provider: LlmProvider): String = SecureStore[key("last_picked_model", provider)].orEmpty()
+
+    fun setLastPickedModel(provider: LlmProvider, value: String) =
+        SecureStore.put(context, key("last_picked_model", provider), value)
+
+    /** The provider's public model catalogue (not secret), in ModelCatalog.encode format. */
+    fun cachedModelsFor(provider: LlmProvider): String = cache.getString(key("models", provider), null).orEmpty()
+
+    fun setCachedModels(provider: LlmProvider, value: String) =
+        cache.edit().putString(key("models", provider), value).apply()
+
+    // -------------------------------------------------------------- catering
+
+    var catering: Catering
+        get() = Catering.byId(SecureStore["catering"])
+        set(value) = SecureStore.put(context, "catering", value.id)
+
+    fun mealMappingFor(catering: Catering): String =
+        SecureStore[key("meal_mapping", catering)] ?: catering.defaultMealMapping
+
+    fun setMealMapping(catering: Catering, value: String) =
+        SecureStore.put(context, key("meal_mapping", catering), value.ifBlank { null })
+
+    /** Code letter → meal mapping of the active catering. */
+    val mealMapping: String get() = mealMappingFor(catering)
+
+    /** The user's description of a custom catering's label. */
+    var customPrompt: String
+        get() = SecureStore["custom_prompt"] ?: LabelPrompt.CUSTOM_DEFAULT
+        set(value) = SecureStore.put(context, "custom_prompt", value.ifBlank { null })
+
+    /** The prompt sent with the photo for the active catering. */
+    val labelPrompt: String get() = LabelPrompt.forCatering(catering, customPrompt)
+
+    // ----------------------------------------------------------------- other
 
     var autoSave: Boolean
         get() = SecureStore["auto_save"] != "false"
         set(value) = SecureStore.put(context, "auto_save", value.toString())
-
-    var mealMapping: String
-        get() = SecureStore["meal_mapping"] ?: MealMapping.DEFAULT
-        set(value) = SecureStore.put(context, "meal_mapping", value.ifBlank { null })
 
     var aapsPackage: String
         get() = SecureStore["aaps_package"] ?: DEFAULT_AAPS_PACKAGE
@@ -49,16 +94,10 @@ class Settings(context: Context) {
         get() = SecureStore["gallery_grid"] != "false"
         set(value) = SecureStore.put(context, "gallery_grid", value.toString())
 
-    /** Public model catalogue from OpenRouter (not secret), in ModelCatalog.encode format. */
-    var cachedModels: String
-        get() = cache.getString("models", null).orEmpty()
-        set(value) = cache.edit().putString("models", value).apply()
-
     val biometricProtected: Boolean get() = SecureStore.isBiometricMode(context)
     val biometricAvailable: Boolean get() = SecureStore.biometricAvailable(context)
 
     companion object {
-        const val DEFAULT_MODEL = "google/gemini-2.5-flash"
         const val DEFAULT_AAPS_PACKAGE = "info.nightscout.androidaps"
         const val FITATU_PACKAGE = "com.fitatu.tracker"
     }

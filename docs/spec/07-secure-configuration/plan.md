@@ -7,7 +7,7 @@
   `setBiometric`, and the private `rewrap`, `saveBlob`, `loadBlob`. OAEP uses SHA-256 with MGF1
   SHA-1 on both sides, as the Keystore requires.
 - `app/src/main/kotlin/pl/lovefitatu/bridge/data/Settings.kt`: typed accessors over the store;
-  `apiKey`'s setter toggles biometric mode. Deletes the plain `settings` preferences left by the
+  `setApiKey` turns biometric mode on while any provider has a key. Deletes the plain `settings` preferences left by the
   first build.
 - `app/src/main/kotlin/pl/lovefitatu/bridge/MainActivity.kt`: `LockScreen`, `promptUnlock`
   (`BiometricPrompt` with a `CryptoObject`, `BIOMETRIC_STRONG`), `onUnlocked`, the reset-and-warn

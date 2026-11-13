@@ -49,7 +49,7 @@ object History {
     fun root(context: Context): File = (context.getExternalFilesDir(null) ?: context.filesDir).resolve("labels")
 
     /** Saves the photo and a TOML holding only `[meta]`; detection and saved values are added later. */
-    fun create(context: Context, photo: Bitmap, taken: LocalDateTime, model: String): LabelRecord {
+    fun create(context: Context, photo: Bitmap, taken: LocalDateTime, model: String, provider: String, catering: String): LabelRecord {
         val dir = root(context).resolve(taken.toLocalDate().toString()).apply { mkdirs() }
         var stem = taken.format(TIME_FILE)
         var n = 2
@@ -60,6 +60,8 @@ object History {
             "taken" to taken.withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             "photo" to "$stem.jpg",
             "model" to model,
+            "provider" to provider,
+            "catering" to catering,
         )
         return write(File(dir, "$stem.toml"), mapOf(LabelRecord.META to meta))
     }

@@ -2,8 +2,10 @@
 
 ## Goal
 
-Read the values needed for Fitatu and AAPS off the label photo with an OpenRouter vision model,
-without guessing anything the model cannot read.
+Read the values needed for Fitatu and AAPS off the label photo with a vision model, without guessing
+anything the model cannot read. Which service runs the model is covered by
+[10 LLM providers](../10-llm-providers/intent.md); which prompt describes the label by
+[11 Diet caterings](../11-diet-caterings/intent.md).
 
 ## Behaviour
 
@@ -25,10 +27,12 @@ The model returns, for the whole meal:
 ## Constraints
 
 - The image sent to the model is scaled to a 1600 px long edge, JPEG quality 85, as a data URL.
-- Temperature 0. A strict JSON schema is requested; models that reject it (any HTTP 4xx except
-  401/402) are asked once more without the schema.
+- Temperature 0 where the provider accepts one. A strict JSON schema is requested; models that
+  reject it (any HTTP 4xx except 401/402/403/429) are asked once more without the schema and
+  without a temperature.
+- A refusal or an empty reply is an error, never a label.
 - The reply parser tolerates code fences or prose around the JSON object.
-- The model used is the one chosen in Settings (default `google/gemini-2.5-flash`).
+- The provider, model and catering used are the ones chosen in Settings.
 
 ## Out of scope
 

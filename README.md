@@ -1,12 +1,13 @@
 # Love → Fitatu
 
-An Android app that reads a Love Catering meal label from a photo and enters its nutrition values
-into Fitatu and the carbs into the AAPS bolus calculator.
+An Android app that reads a diet-catering meal label (Love Catering, or your own) from a photo and
+enters its nutrition values into Fitatu and the carbs into the AAPS bolus calculator.
 
 ## How it works
 
 1. Take a photo of the label, pick one from the gallery, or share an image to the app.
-2. An OpenRouter vision model reads the dish code, the date and the nutrition values.
+2. A vision model from the provider you chose (OpenRouter, Anthropic, OpenAI or Together AI) reads
+   the dish code, the day and the nutrition values.
 3. You check and correct the values on the review screen.
 4. The app's accessibility service fills Fitatu's quick-add form for the right day and meal,
    and the carbs field of the AAPS bolus calculator. It never confirms a bolus.
@@ -16,7 +17,10 @@ Every photo and what was read from it is kept in the in-app history.
 ## Requirements
 
 - Android 12 (API 31) or newer
-- An [OpenRouter](https://openrouter.ai/settings/keys) API key
+- An API key for one of: [OpenRouter](https://openrouter.ai/settings/keys),
+  [Anthropic](https://platform.claude.com/settings/keys),
+  [OpenAI](https://platform.openai.com/api-keys),
+  [Together AI](https://api.together.ai/settings/api-keys)
 - Fitatu and, optionally, AAPS installed
 - The app's accessibility service turned on (Settings → Accessibility)
 
@@ -24,9 +28,11 @@ Every photo and what was read from it is kept in the in-app history.
 
 Open **Settings** in the app and set:
 
-- **OpenRouter API key** and the vision **model** to use.
-- **Code letter = meal**: maps the letter in the dish code (e.g. `10284/K/M`) to a Fitatu meal,
-  by default `Ś=breakfast, O=dinner, P=snack, K=supper`.
+- **Model provider**, its **API key** and the vision **model** to use. Each provider keeps its own
+  key and model.
+- **Catering**: Love Catering, or **Własny** (custom), where you describe your label for the model.
+- Under **Zaawansowane**, **Code letter = meal**: maps the letter in the dish code (e.g.
+  `10284/K/M`) to a Fitatu meal, by default `Ś=breakfast, O=dinner, P=snack, K=supper`.
 - **AAPS package**, if yours differs from the default.
 
 The configuration and API key can be locked behind biometrics.

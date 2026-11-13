@@ -191,6 +191,7 @@ private val keyLabels = mapOf(
     "kcal" to "kcal", "fat_g" to "Tłuszcz (g)", "carbs_g" to "Węglowodany (g)", "protein_g" to "Białko (g)",
     "meal_label" to "Posiłek", "date" to "Data posiłku", "sent_to" to "Wysłano do", "saved_at" to "Zapisano",
     "aaps_carbs_g" to "Węglowodany do AAPS (g)", "taken" to "Zdjęcie z", "model" to "Model",
+    "provider" to "Dostawca modelu", "catering" to "Catering",
     "photo" to "Plik", "error" to "Błąd",
 )
 private val hiddenKeys = setOf("meal")

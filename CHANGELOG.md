@@ -8,6 +8,21 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-13
+
+### Added
+
+- Choose the model provider in Settings: OpenRouter, Anthropic, OpenAI or Together AI. Each keeps its own API key, model and model list.
+- Choose the catering in Settings: Love Catering, or a custom one whose label you describe for the model in your own words.
+- Each history entry records the provider and catering used.
+
+### Changed
+
+- Settings is grouped into cards with icons; the provider and the catering are picked from a menu with logos.
+- The code letter to meal mapping moved under an advanced section and is kept per catering.
+- The model picker accepts any typed model id without spaces, not only ids containing a slash.
+- A model refusal or an empty reply is reported as an error instead of being read as a label.
+
 ## [0.0.1] - 2026-11-13
 
 ### Added

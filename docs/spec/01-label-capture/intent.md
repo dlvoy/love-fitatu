@@ -11,7 +11,7 @@ Get a photo of a Love Catering meal label into the app with as few taps as possi
 - Sharing an image to the app from any other app (`ACTION_SEND`, `image/*`) starts the same flow.
 - A share that arrives while the configuration is still locked is held and processed right after
   unlocking.
-- Without an OpenRouter API key the app does not process the photo; it shows an error and opens
+- Without an API key for the active provider the app does not process the photo; it shows an error and opens
   Settings.
 - While a label is being read, the capture buttons are disabled and a progress line is shown.
 - The photo is saved to history before the model is asked, so a failed read is still kept
