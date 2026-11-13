@@ -8,6 +8,13 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-13
+
+### Changed
+
+- The Fitatu and AAPS version checks in Settings are state buttons: green with the version when it is fine, red when the app is missing or too old, yellow while it still has to be checked.
+- Opening Settings checks the installed Fitatu and AAPS versions.
+
 ## [0.3.0] - 2026-11-13
 
 ### Added

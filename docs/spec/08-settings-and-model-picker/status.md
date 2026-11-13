@@ -1,7 +1,8 @@
 # 08 Settings and model picker: status
 
 **State:** done (shipped in 0.0.1; sectioned layout, provider and catering choice in 0.1.0;
-accessibility state button, version check buttons and advanced AAPS package in 0.3.0)
+accessibility state button, version check buttons and advanced AAPS package in 0.3.0; version
+state buttons in 0.4.0)
 
 ## Done
 

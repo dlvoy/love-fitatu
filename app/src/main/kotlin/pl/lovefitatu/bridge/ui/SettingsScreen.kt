@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -231,31 +230,39 @@ private fun AutomationSettings(settings: Settings, serviceEnabled: Boolean, onOp
     )
 }
 
-/** A button that checks the installed version of [app], with the last result under it. */
+/**
+ * A state button for the installed version of [app]: green when it can be steered, red when it is
+ * missing or too old, yellow while it still has to be checked. Tapping it checks again.
+ */
 @Composable
 private fun VersionCheckRow(settings: Settings, app: SteeredApp, packageName: String) {
     val context = LocalContext.current
     var stored by remember(app) { mutableStateOf(settings.versionCheck(app)) }
+    // Opening Settings checks what is installed now. Typing another AAPS package does not: a half
+    // typed name is not worth recording, so that one waits for a tap.
+    LaunchedEffect(app) { stored = settings.refreshVersionCheck(app, packageName) }
     // A result for another package (the AAPS package was changed since) says nothing about this one.
     val check = stored?.takeIf { it.packageName == packageName }
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedButton(
+        StateButton(
+            state = when {
+                check == null -> ButtonState.TO_CHECK
+                check.ok -> ButtonState.OK
+                else -> ButtonState.BAD
+            },
+            text = check?.summary(app) ?: "Sprawdź wersję ${app.label}",
             onClick = { stored = AppVersions.check(context, app, packageName).also { settings.setVersionCheck(app, it) } },
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text("Sprawdź wersję ${app.label}") }
-        val small = MaterialTheme.typography.bodySmall
-        if (check == null) Text(
-            "Jeszcze nie sprawdzono." + (app.minVersion?.let { " Wymagana wersja $it lub nowsza." } ?: ""),
-            style = small, color = MaterialTheme.colorScheme.onSurfaceVariant,
-        ) else Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            val color = if (check.ok) StateGreen else MaterialTheme.colorScheme.error
-            Icon(
-                painterResource(if (check.ok) R.drawable.ic_check_circle else R.drawable.ic_warning), null,
-                tint = color, modifier = Modifier.size(16.dp),
-            )
-            Text("${check.describe(app)} · sprawdzono ${check.checkedAt()}", style = small, color = color)
-        }
+        )
+        Text(
+            when {
+                check == null -> "Jeszcze nie sprawdzono. Wymagana wersja ${app.minVersion} lub nowsza."
+                check.ok -> "Sprawdzono ${check.checkedAt()}. Dotknij, aby sprawdzić ponownie."
+                else -> "${check.describe(app)}. Sprawdzono ${check.checkedAt()}."
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = if (check?.ok == false) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -302,8 +309,26 @@ private fun AdvancedHeader(expanded: Boolean, onToggle: () -> Unit) {
     }
 }
 
-private val StateGreen = Color(0xFF2E7D32)
-private val StateOrange = Color(0xFFE65100)
+/** What a [StateButton] reports, with its fill colour, content colour and icon. */
+private enum class ButtonState(val container: Color, val content: Color, val icon: Int) {
+    OK(Color(0xFF2E7D32), Color.White, R.drawable.ic_check_circle),
+    NEEDED(Color(0xFFE65100), Color.White, R.drawable.ic_warning),
+    BAD(Color(0xFFC62828), Color.White, R.drawable.ic_warning),
+    TO_CHECK(Color(0xFFFBC02D), Color(0xFF1F1F1F), R.drawable.ic_refresh),
+}
+
+/** A full-width button that shows a state by its colour and icon and acts on it when tapped. */
+@Composable
+private fun StateButton(state: ButtonState, text: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = state.container, contentColor = state.content),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Icon(painterResource(state.icon), null, modifier = Modifier.size(20.dp))
+        Text(text, modifier = Modifier.padding(start = 8.dp))
+    }
+}
 
 /**
  * Shows the state of the accessibility service and opens its system settings: green with a check
@@ -311,20 +336,11 @@ private val StateOrange = Color(0xFFE65100)
  */
 @Composable
 fun AccessibilityButton(enabled: Boolean, onClick: () -> Unit) {
-    Button(
+    StateButton(
+        state = if (enabled) ButtonState.OK else ButtonState.NEEDED,
+        text = if (enabled) "Usługa ułatwień dostępu włączona" else "Włącz usługę ułatwień dostępu",
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = if (enabled) StateGreen else StateOrange, contentColor = Color.White),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Icon(
-            painterResource(if (enabled) R.drawable.ic_check_circle else R.drawable.ic_warning), null,
-            modifier = Modifier.size(20.dp),
-        )
-        Text(
-            if (enabled) "Usługa ułatwień dostępu włączona" else "Włącz usługę ułatwień dostępu",
-            modifier = Modifier.padding(start = 8.dp),
-        )
-    }
+    )
 }
 
 /** One entry of a [ChoiceField]. [tint] is false for full-colour logos, which keep their own colours. */

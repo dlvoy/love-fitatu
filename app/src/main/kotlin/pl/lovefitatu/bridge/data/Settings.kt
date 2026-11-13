@@ -1,6 +1,7 @@
 package pl.lovefitatu.bridge.data
 
 import android.content.Context
+import pl.lovefitatu.bridge.automation.AppVersions
 import pl.lovefitatu.bridge.automation.SteeredApp
 import pl.lovefitatu.bridge.automation.VersionCheck
 import pl.lovefitatu.bridge.ocr.LlmProvider
@@ -95,6 +96,19 @@ class Settings(context: Context) {
     fun versionCheck(app: SteeredApp): VersionCheck? = VersionCheck.decode(SecureStore[app.storageKey])
 
     fun setVersionCheck(app: SteeredApp, check: VersionCheck) = SecureStore.put(context, app.storageKey, check.encode())
+
+    /**
+     * Looks at what is installed as [packageName] now. The check on record, with its time, is kept
+     * when it already describes that; otherwise (never checked, another package, the app was
+     * updated, another verdict) the new one replaces it.
+     */
+    fun refreshVersionCheck(app: SteeredApp, packageName: String): VersionCheck {
+        val now = AppVersions.check(context, app, packageName)
+        val known = versionCheck(app)
+        if (known != null && known.sameFinding(now)) return known
+        setVersionCheck(app, now)
+        return now
+    }
 
     /** History view: photo grid when true, list with details when false. */
     var galleryGrid: Boolean

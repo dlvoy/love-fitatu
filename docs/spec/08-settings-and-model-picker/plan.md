@@ -6,8 +6,9 @@
   `ChoiceField` (read-only field with icon plus a `DropdownMenu`), and one composable per card:
   `LlmSettings` (state keyed by provider, the model list `LaunchedEffect` with 1 s debounce and
   refresh counter), `CateringSettings`, `AutomationSettings`, `About`. `AdvancedHeader` is the
-  shared **Zaawansowane** toggle, `AccessibilityButton` the state button (also used by
-  `MainActivity`), `VersionCheckRow` a version check button with its stored result.
+  shared **Zaawansowane** toggle. `StateButton` is a full-width button coloured by a `ButtonState`
+  (`OK` green, `NEEDED` orange, `BAD` red, `TO_CHECK` yellow); `AccessibilityButton` (also used by
+  `MainActivity`) and `VersionCheckRow` are built on it.
 - `app/src/main/kotlin/pl/lovefitatu/bridge/ui/ModelPickerDialog.kt`: `preferredModels`,
   `filterModels`, `canUseTypedId`, the dialog with search and manual id entry.
 - `app/src/main/kotlin/pl/lovefitatu/bridge/ocr/ModelCatalog.kt`: `fetchModels` and `parse` per

@@ -52,7 +52,6 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import pl.lovefitatu.bridge.automation.AppVersions
 import pl.lovefitatu.bridge.automation.AutomationJob
 import pl.lovefitatu.bridge.automation.AutomationStatus
 import pl.lovefitatu.bridge.automation.BridgeAccessibilityService
@@ -423,17 +422,15 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Looks at the installed version of the app [job] is about to steer. The check on record is
-     * replaced when it no longer describes what is installed: never checked, another package, or the
-     * app was updated since. Returns the reason the app must not be steered, or null when it may.
+     * Looks at the installed version of the app [job] is about to steer, refreshing the check on
+     * record. Returns the reason the app must not be steered, or null when it may.
      */
     private fun versionProblem(job: AutomationJob): String? {
         val (app, pkg) = when (job) {
             is AutomationJob.Fitatu -> SteeredApp.FITATU to Settings.FITATU_PACKAGE
             is AutomationJob.Aaps -> SteeredApp.AAPS to job.packageName
         }
-        val check = AppVersions.check(this, app, pkg)
-        if (settings.versionCheck(app)?.sameFinding(check) != true) settings.setVersionCheck(app, check)
+        val check = settings.refreshVersionCheck(app, pkg)
         return if (check.ok) null else "Przerwano: ${check.describe(app)}."
     }
 

@@ -27,7 +27,7 @@ Settings is a column of titled cards, each with an icon:
     accessibility settings. Orange with a warning icon and **Włącz usługę ułatwień dostępu** while
     the service is off, green with a check mark and **Usługa ułatwień dostępu włączona** while it
     is on. The main screen shows the orange button while the service is off.
-  - **Sprawdź wersję Fitatu** and **Sprawdź wersję AAPS**, each with its last result underneath
+  - A version state button for Fitatu and one for AAPS, in the same style: green, red or yellow
     (see [13](../13-app-version-check/intent.md)).
   - **Zaawansowane**, collapsed by default: **Pakiet AAPS**, the AAPS package name.
 - **O aplikacji**: copyright, version name and code, build time and git commit.
