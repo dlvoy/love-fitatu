@@ -13,10 +13,11 @@ steer a version older than the one the automation was written for.
   written against 4.17.x).
 - **AAPS** (the package from Settings) passes when it is installed in version **4.0.0 or newer**.
 - Only the leading numbers of a version count, so `4.0.0-dev` is 4.0.0.
-- Settings, card **Fitatu i AAPS**, has one state button per app. It is green with a check mark
-  and the version when the check passed, red with a warning when the app is missing or too old,
-  and yellow with **Sprawdź wersję …** while the app still has to be checked. A line under it
-  gives the time of the check and, when it failed, the reason. Tapping the button checks again.
+- Settings, card **Fitatu i AAPS**, has one state button per app, with nothing under it. It is
+  green with a check mark, the version and the time of the check (`Fitatu 4.17.3 (@ 13.11.2026
+  14:02)`) when the check passed; red with a warning and the reason (`AAPS 3.3.2: wymagana
+  4.0.0+`, `AAPS: brak aplikacji`) when the app is too old or missing; yellow with **Sprawdź
+  wersję …** while the app still has to be checked. Tapping the button checks again.
 - Opening Settings looks at both apps the same way a run does (next point), so the buttons show
   what is installed now. The yellow state is left for an AAPS package that was just edited.
 - The last result of each app is kept: package, version, the time the system last installed or

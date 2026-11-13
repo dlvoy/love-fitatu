@@ -244,26 +244,15 @@ private fun VersionCheckRow(settings: Settings, app: SteeredApp, packageName: St
     // A result for another package (the AAPS package was changed since) says nothing about this one.
     val check = stored?.takeIf { it.packageName == packageName }
 
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        StateButton(
-            state = when {
-                check == null -> ButtonState.TO_CHECK
-                check.ok -> ButtonState.OK
-                else -> ButtonState.BAD
-            },
-            text = check?.summary(app) ?: "Sprawdź wersję ${app.label}",
-            onClick = { stored = AppVersions.check(context, app, packageName).also { settings.setVersionCheck(app, it) } },
-        )
-        Text(
-            when {
-                check == null -> "Jeszcze nie sprawdzono. Wymagana wersja ${app.minVersion} lub nowsza."
-                check.ok -> "Sprawdzono ${check.checkedAt()}. Dotknij, aby sprawdzić ponownie."
-                else -> "${check.describe(app)}. Sprawdzono ${check.checkedAt()}."
-            },
-            style = MaterialTheme.typography.bodySmall,
-            color = if (check?.ok == false) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    StateButton(
+        state = when {
+            check == null -> ButtonState.TO_CHECK
+            check.ok -> ButtonState.OK
+            else -> ButtonState.BAD
+        },
+        text = check?.summary(app) ?: "Sprawdź wersję ${app.label}",
+        onClick = { stored = AppVersions.check(context, app, packageName).also { settings.setVersionCheck(app, it) } },
+    )
 }
 
 @Composable

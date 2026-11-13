@@ -8,6 +8,12 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-13
+
+### Changed
+
+- The Fitatu and AAPS version buttons in Settings no longer have a status line under them: the green button carries the time of the check, the red one the required version.
+
 ## [0.4.0] - 2026-11-13
 
 ### Changed

@@ -1,6 +1,7 @@
 # 13 App version check: status
 
-**State:** done (shipped in 0.3.0; state buttons and the check on opening Settings in 0.4.0)
+**State:** done (shipped in 0.3.0; state buttons and the check on opening Settings in 0.4.0;
+check time on the button instead of a line under it in 0.5.0)
 
 ## Done
 

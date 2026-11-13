@@ -27,11 +27,11 @@ data class VersionCheck(val packageName: String, val version: String?, val updat
         else -> "${app.label} ${version.ifBlank { "w nieznanej wersji" }} jest za stare, wymagana wersja ${app.minVersion} lub nowsza"
     }
 
-    /** Short form of [describe] for a button. */
-    fun summary(app: SteeredApp): String = when {
+    /** Short form of [describe] for a button; a passing check also says when it was made. */
+    fun summary(app: SteeredApp, zone: ZoneId = ZoneId.systemDefault()): String = when {
         version == null -> "${app.label}: brak aplikacji"
-        ok -> "${app.label} $version"
-        else -> "${app.label} ${version.ifBlank { "?" }}: za stara wersja"
+        ok -> "${app.label} $version (@ ${checkedAt(zone)})"
+        else -> "${app.label} ${version.ifBlank { "?" }}: wymagana ${app.minVersion}+"
     }
 
     fun checkedAt(zone: ZoneId = ZoneId.systemDefault()): String = TIME.format(Instant.ofEpochMilli(at).atZone(zone))

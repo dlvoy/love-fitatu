@@ -150,8 +150,8 @@ class BridgeTest {
         assertFalse(AppVersions.evaluate(SteeredApp.FITATU, fitatuPkg, "4.16.9", 100, 5).ok)
         assertFalse(AppVersions.evaluate(SteeredApp.FITATU, fitatuPkg, "", 100, 5).ok)
 
-        assertEquals("AAPS 4.0.1", good.summary(SteeredApp.AAPS))
-        assertEquals("AAPS 3.3.2: za stara wersja", old.summary(SteeredApp.AAPS))
+        assertEquals("AAPS 4.0.1 (@ 01.01.1970 00:00)", good.summary(SteeredApp.AAPS, ZoneOffset.UTC))
+        assertEquals("AAPS 3.3.2: wymagana 4.0.0+", old.summary(SteeredApp.AAPS))
         assertEquals("AAPS: brak aplikacji", missing.summary(SteeredApp.AAPS))
 
         // A later look that finds the same install keeps the record; an update or another package replaces it.
