@@ -34,6 +34,7 @@ import pl.cukrzycowy.labelbite.data.Toml
 import pl.cukrzycowy.labelbite.ui.clampPan
 import pl.cukrzycowy.labelbite.ui.detailRows
 import pl.cukrzycowy.labelbite.ui.formatCost
+import pl.cukrzycowy.labelbite.ui.dayTitle
 import pl.cukrzycowy.labelbite.ui.weekTitle
 import pl.cukrzycowy.labelbite.ui.canUseTypedId
 import pl.cukrzycowy.labelbite.ui.filterModels
@@ -195,7 +196,17 @@ class BridgeTest {
         val weeks = History.byWeek(days) { it }
         assertEquals(listOf(LocalDate.parse("2026-11-09"), LocalDate.parse("2026-11-02")), weeks.map { it.first })
         assertEquals(3, weeks[0].second.size)
-        assertEquals("Tydzień 46 · 9.11–15.11.2026", weekTitle(weeks[0].first))
+        assertEquals("Tydzień 46", weekTitle(weeks[0].first))
+    }
+
+    @Test
+    fun historyDaysWithinWeekNewestFirst() {
+        val days = listOf("2026-11-12", "2026-11-09", "2026-11-12", "2026-11-15").map(LocalDate::parse)
+        val grouped = History.byDay(days) { it }
+        assertEquals(listOf("2026-11-15", "2026-11-12", "2026-11-09").map(LocalDate::parse), grouped.map { it.first })
+        assertEquals(2, grouped[1].second.size)
+        assertEquals("Poniedziałek", dayTitle(LocalDate.parse("2026-11-09")))
+        assertEquals("Środa", dayTitle(LocalDate.parse("2026-11-11")))
     }
 
     @Test

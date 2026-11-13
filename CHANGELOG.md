@@ -8,6 +8,28 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-13
+
+### Added
+
+- The history has day headers under each week, with the weekday name and its date.
+- The history scrolls endlessly: older labels are read as you scroll, so a long history opens faster.
+- The take photo and gallery buttons have large icons, and the Fitatu and AAPS buttons carry the logo of their app.
+
+### Changed
+
+- Settings, label details, label editing, the photo viewer and the model picker are left with a back arrow next to the title instead of a Gotowe, Zamknij or Anuluj button.
+- Label details open as a full screen; a pencil icon in the top bar opens the label for editing.
+- The model picker is a full screen.
+- Settings open from a cog icon in the top bar.
+- Week headers show only the week number and have a filled background; list rows show the time instead of the full date.
+- The return to the last label action is a full-width button with an icon.
+- The day in label editing has a calendar icon, and the note about AAPS is smaller and grey.
+
+### Removed
+
+- The combined "Fitatu, potem AAPS" button. Send to Fitatu and to the AAPS bolus calculator separately.
+
 ## [0.6.0] - 2026-11-13
 
 ### Changed

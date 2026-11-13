@@ -3,17 +3,21 @@ package pl.cukrzycowy.labelbite.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,8 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import pl.cukrzycowy.labelbite.R
 import pl.cukrzycowy.labelbite.ocr.ModelInfo
 
 /** Preferred ids for the picker: the provider's fixed ones, then the user's last pick if it is a different model. */
@@ -39,6 +46,7 @@ fun filterModels(models: List<ModelInfo>, query: String): List<ModelInfo> {
     else models.filter { it.id.contains(q, ignoreCase = true) || it.name.contains(q, ignoreCase = true) }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelPickerDialog(
     models: List<ModelInfo>,
@@ -53,9 +61,17 @@ fun ModelPickerDialog(
     var query by remember { mutableStateOf("") }
     val byId = remember(models) { models.associateBy { it.id } }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(shape = MaterialTheme.shapes.large, tonalElevation = 6.dp, modifier = Modifier.fillMaxHeight(0.9f)) {
-            Column(Modifier.padding(vertical = 16.dp)) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Surface(Modifier.fillMaxSize()) {
+            Column(Modifier.padding(bottom = 16.dp)) {
+                TopAppBar(
+                    title = { Text("Wybierz model") },
+                    navigationIcon = {
+                        IconButton(onDismiss) { Icon(painterResource(R.drawable.ic_arrow_back), "Wróć") }
+                    },
+                    // The dialog window already sits inside the system bars.
+                    windowInsets = WindowInsets(0, 0, 0, 0),
+                )
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
@@ -85,7 +101,6 @@ fun ModelPickerDialog(
                         if (matches.isEmpty() && !usable) item { SectionLabel("Brak wyników") }
                     }
                 }
-                TextButton(onDismiss, modifier = Modifier.align(Alignment.End).padding(horizontal = 8.dp)) { Text("Anuluj") }
             }
         }
     }

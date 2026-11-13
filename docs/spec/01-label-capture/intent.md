@@ -7,7 +7,8 @@ Get a photo of a Love Catering meal label into the app with as few taps as possi
 ## Behaviour
 
 - The main screen offers **Zrób zdjęcie** (take a photo with the system camera) and **Z galerii**
-  (pick an image with the system photo picker).
+  (pick an image with the system photo picker). Both are tall buttons with a large icon centred
+  above the label.
 - Sharing an image to the app from any other app (`ACTION_SEND`, `image/*`) starts the same flow.
 - A share that arrives while the configuration is still locked is held and processed right after
   unlocking.

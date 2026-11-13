@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -51,6 +52,8 @@ import androidx.core.content.IntentCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import pl.cukrzycowy.labelbite.automation.AutomationJob
 import pl.cukrzycowy.labelbite.automation.AutomationStatus
@@ -66,7 +69,7 @@ import pl.cukrzycowy.labelbite.ocr.LabelResult
 import pl.cukrzycowy.labelbite.ocr.LlmException
 import pl.cukrzycowy.labelbite.ui.AccessibilityButton
 import pl.cukrzycowy.labelbite.ui.Gallery
-import pl.cukrzycowy.labelbite.ui.RecordDialog
+import pl.cukrzycowy.labelbite.ui.RecordDetails
 import pl.cukrzycowy.labelbite.ui.ReviewData
 import pl.cukrzycowy.labelbite.ui.ReviewScreen
 import pl.cukrzycowy.labelbite.ui.SettingsScreen
@@ -76,7 +79,7 @@ import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
 
-    private enum class Screen { MAIN, REVIEW, SETTINGS }
+    private enum class Screen { MAIN, DETAILS, REVIEW, SETTINGS }
 
     private lateinit var settings: Settings
     private var unlocked by mutableStateOf(false)
@@ -89,8 +92,14 @@ class MainActivity : ComponentActivity() {
     private var busy by mutableStateOf(false)
     private var error by mutableStateOf<String?>(null)
     private var serviceEnabled by mutableStateOf(false)
+    /** The newest history entries read so far; the gallery asks for more as it is scrolled. */
     private var records by mutableStateOf(emptyList<LabelRecord>())
+
+    /** TOML files of every history entry, newest first. Entries past [records] are not read yet. */
+    private var historyFiles by mutableStateOf(emptyList<File>())
+    private val historyLock = Mutex()
     private var galleryGrid by mutableStateOf(true)
+    /** The history entry shown on the details screen. */
     private var opened by mutableStateOf<LabelRecord?>(null)
 
     /** TOML paths of history entries ticked in selection mode (entered by long press). */
@@ -133,9 +142,6 @@ class MainActivity : ComponentActivity() {
                     confirmButton = { TextButton(::deleteSelected) { Text("Usuń", color = MaterialTheme.colorScheme.error) } },
                     dismissButton = { TextButton({ confirmDelete = false }) { Text("Anuluj") } },
                 )
-                opened?.let { record ->
-                    RecordDialog(record, onReuse = { reopen(record) }, onDismiss = { opened = null })
-                }
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -144,9 +150,16 @@ class MainActivity : ComponentActivity() {
                                     when {
                                         selecting -> "Zaznaczono: ${selected.size}"
                                         screen == Screen.SETTINGS -> "Ustawienia"
+                                        screen == Screen.DETAILS -> "Szczegóły etykiety"
+                                        screen == Screen.REVIEW -> "Edycja etykiety"
                                         else -> "LabelBite"
                                     }
                                 )
+                            },
+                            navigationIcon = {
+                                if (screen != Screen.MAIN) IconButton({ screen = Screen.MAIN }) {
+                                    Icon(painterResource(R.drawable.ic_arrow_back), "Wróć")
+                                }
                             },
                             actions = {
                                 if (selecting) {
@@ -162,9 +175,14 @@ class MainActivity : ComponentActivity() {
                                     if (galleryGrid) Icon(painterResource(R.drawable.ic_list), "Pokaż jako listę")
                                     else Icon(painterResource(R.drawable.ic_grid), "Pokaż jako siatkę zdjęć")
                                 }
-                                if (selecting) Unit
-                                else if (screen == Screen.MAIN) TextButton({ screen = Screen.SETTINGS }) { Text("Ustawienia") }
-                                else TextButton({ screen = Screen.MAIN }) { Text("Gotowe") }
+                                if (!selecting && screen == Screen.MAIN) IconButton({ screen = Screen.SETTINGS }) {
+                                    Icon(painterResource(R.drawable.ic_settings), "Ustawienia")
+                                }
+                                if (screen == Screen.DETAILS) opened?.let { record ->
+                                    IconButton({ reopen(record) }) {
+                                        Icon(painterResource(R.drawable.ic_edit), "Otwórz do edycji")
+                                    }
+                                }
                             },
                         )
                     },
@@ -178,7 +196,15 @@ class MainActivity : ComponentActivity() {
                         Notices()
                         Gallery(
                             records, galleryGrid, settings.mealMapping, selected,
-                            onClick = { if (selected.isEmpty()) opened = it else toggleSelected(it) },
+                            hasMore = records.size < historyFiles.size,
+                            onLoadMore = ::loadMoreHistory,
+                            onClick = {
+                                if (selected.isNotEmpty()) toggleSelected(it)
+                                else {
+                                    opened = it
+                                    screen = Screen.DETAILS
+                                }
+                            },
                             onLongClick = ::toggleSelected,
                             modifier = Modifier.weight(1f),
                         )
@@ -186,8 +212,11 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = base.verticalScroll(rememberScrollState()).padding(16.dp),
                     ) {
-                        if (screen == Screen.SETTINGS) SettingsScreen(settings, serviceEnabled, ::openAccessibilitySettings, ::openUrl)
-                        else review?.let { ReviewScreen(it, settings, status, ::run) }
+                        when (screen) {
+                            Screen.SETTINGS -> SettingsScreen(settings, serviceEnabled, ::openAccessibilitySettings, ::openUrl)
+                            Screen.DETAILS -> opened?.let { RecordDetails(it) }
+                            else -> review?.let { ReviewScreen(it, settings, status, ::run) }
+                        }
                         Notices()
                     }
                 }
@@ -212,25 +241,45 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun MainContent(status: String?) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(::launchCamera, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Zrób zdjęcie") }
+            Button(::launchCamera, enabled = !busy, shape = captureShape, modifier = Modifier.weight(1f)) {
+                CaptureLabel(R.drawable.ic_photo_camera, "Zrób zdjęcie")
+            }
             OutlinedButton(
                 { pickPhoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                 enabled = !busy,
+                shape = captureShape,
                 modifier = Modifier.weight(1f),
-            ) { Text("Z galerii") }
+            ) { CaptureLabel(R.drawable.ic_photo_library, "Z galerii") }
         }
         if (busy) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
             Text("Odczytywanie etykiety…")
         }
-        if (review != null && !busy) TextButton({ screen = Screen.REVIEW }) { Text("Wróć do ostatniej etykiety") }
+        if (review != null && !busy) OutlinedButton({ screen = Screen.REVIEW }, modifier = Modifier.fillMaxWidth()) {
+            Icon(painterResource(R.drawable.ic_history), null, modifier = Modifier.size(18.dp))
+            Text("Wróć do ostatniej etykiety", modifier = Modifier.padding(start = 8.dp))
+        }
         status?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+    }
+
+    /** The content of a capture button: a large icon centred above its label. */
+    @Composable
+    private fun CaptureLabel(icon: Int, label: String) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(vertical = 8.dp),
+        ) {
+            Icon(painterResource(icon), null, modifier = Modifier.size(40.dp))
+            Text(label)
+        }
     }
 
     @Composable
     private fun Notices() {
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (!serviceEnabled && screen != Screen.SETTINGS) AccessibilityButton(false, ::openAccessibilitySettings)
+        val steering = screen == Screen.MAIN || screen == Screen.REVIEW
+        if (!serviceEnabled && steering) AccessibilityButton(false, ::openAccessibilitySettings)
     }
 
     override fun onResume() {
@@ -372,7 +421,6 @@ class MainActivity : ComponentActivity() {
 
     /** Opens a history entry in the review screen, with its saved values if it has any. */
     private fun reopen(record: LabelRecord) {
-        opened = null
         lifecycleScope.launch {
             val photo = withContext(Dispatchers.IO) { ImagePrep.loadFile(record.photo, ImagePrep.STORED_EDGE) }
             showReview(LabelResult.fromToml(record.section(LabelRecord.DETECTED)), photo, record)
@@ -396,8 +444,28 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Lists the history again and re-reads as many entries as were shown, at least one page. */
     private fun reloadHistory() {
-        lifecycleScope.launch { records = withContext(Dispatchers.IO) { History.list(this@MainActivity) } }
+        lifecycleScope.launch {
+            historyLock.withLock {
+                val wanted = maxOf(HISTORY_PAGE, records.size)
+                val (files, loaded) = withContext(Dispatchers.IO) {
+                    History.files(this@MainActivity).let { it to History.load(it.take(wanted)) }
+                }
+                historyFiles = files
+                records = loaded
+            }
+        }
+    }
+
+    /** Reads the next page of older entries; called when the gallery is scrolled to its end. */
+    private fun loadMoreHistory() {
+        lifecycleScope.launch {
+            historyLock.withLock {
+                val next = historyFiles.drop(records.size).take(HISTORY_PAGE)
+                if (next.isNotEmpty()) records = records + withContext(Dispatchers.IO) { History.load(next) }
+            }
+        }
     }
 
     // ----------------------------------------------------------- automation
@@ -444,5 +512,13 @@ class MainActivity : ComponentActivity() {
 
     private fun openAccessibilitySettings() {
         startActivity(Intent(SystemSettings.ACTION_ACCESSIBILITY_SETTINGS))
+    }
+
+    private companion object {
+        /** History entries read per step of the gallery's endless scroll. */
+        const val HISTORY_PAGE = 60
+
+        /** The capture buttons are tall, so they get rounded corners instead of the pill shape. */
+        val captureShape = RoundedCornerShape(16.dp)
     }
 }

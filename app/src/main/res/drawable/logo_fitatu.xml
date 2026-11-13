@@ -1,0 +1,8 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- The monochrome layer of the Fitatu launcher icon (108 x 108), cropped to the glyph. -->
+    <group android:scaleX="0.476" android:scaleY="0.476" android:translateX="-14.23" android:translateY="-13.64">
+        <path android:fillColor="#FF000000"
+            android:pathData="m61.56,76.97l7.91,0L69.47,51.11L61.56,51.11ZM57.31,51.11L40.07,51.11l0,7.77l17.23,0zM60.38,34.04C58.37,31.87 55.39,30.75 51.43,30.75c-3.5,0 -6.29,1.12 -8.3,3.42C41.11,36.47 40.07,39.57 40.07,43.59l0,5.76l7.92,0l0,-5.83c0,-1.65 0.39,-2.96 1.17,-3.88 0.72,-0.86 1.75,-1.32 3.11,-1.32 1.69,0 3.12,0.6 4.28,1.78zM40.07,60.64l0,16.33l7.92,0l0,-16.33zM65.45,46.98c1.3,0 2.41,-0.46 3.31,-1.38 0.91,-0.86 1.36,-1.98 1.36,-3.29 0,-1.25 -0.45,-2.37 -1.36,-3.36 -0.91,-0.92 -2.01,-1.38 -3.31,-1.38 -1.23,0 -2.33,0.46 -3.24,1.38 -0.91,0.99 -1.36,2.11 -1.36,3.36 0,1.32 0.46,2.44 1.36,3.29 0.91,0.92 2.01,1.38 3.24,1.38z" />
+    </group>
+</vector>

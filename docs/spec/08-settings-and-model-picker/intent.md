@@ -7,6 +7,10 @@ way to choose a vision model.
 
 ## Behaviour
 
+Settings opens from the cog icon in the main screen's top bar and is left with the back arrow on
+the left of its title. The model picker is a full screen with the title **Wybierz model** and the
+same back arrow.
+
 Settings is a column of titled cards, each with an icon:
 
 - **Rozpoznawanie etykiety**

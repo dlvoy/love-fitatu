@@ -8,6 +8,8 @@
 - Held share while locked; API key check before processing.
 - Debug-only `debug_label` preset.
 
+- UX pass (unreleased): capture buttons with large icons. Not yet checked by hand on a device.
+
 ## Known gaps
 
 - No automated tests for the capture flow.

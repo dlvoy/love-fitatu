@@ -18,11 +18,19 @@ is sent to Fitatu or AAPS.
   can also be stepped a day at a time or picked from a calendar.
 - An energy mismatch warning is shown when the macros do not add up to the kcal (see
   [02](../02-label-reading/intent.md)).
-- Send actions: **Dodaj do Fitatu** / **Wypełnij w Fitatu** (depending on auto-save), **Kalkulator
-  bolusa AAPS (N g)**, and **Fitatu, potem AAPS**. Each is enabled only when its inputs are valid.
+- The date row reads `<  day  >`: arrows step a day back or forward, and the day itself, marked
+  with a calendar icon, opens the calendar.
+- Send actions: **Dodaj do Fitatu** / **Wypełnij w Fitatu** (depending on auto-save) and
+  **Kalkulator bolusa AAPS (N g)**, each with the single-colour logo of its app. Each is enabled
+  only when its inputs are valid. There is no combined Fitatu-then-AAPS action.
+- Under the send actions, below a thin line, a small centred grey note with an info icon says that
+  in AAPS the app only types the carbs and the user confirms the bolus themselves.
+- The screen is a child screen: its top bar has the title **Edycja etykiety** and a back arrow on
+  the left that returns to the main screen.
 - Pressing a send action records the values on screen in the history entry's `[saved]` section,
   with where they were sent, even if the automation could not start.
-- **Wróć do ostatniej etykiety** on the main screen returns to the open review.
+- **Wróć do ostatniej etykiety** on the main screen, a full-width button with a small icon, returns
+  to the open review.
 - A history entry opened for editing starts from its saved values when it has any.
 
 ## Constraints

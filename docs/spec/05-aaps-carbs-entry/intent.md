@@ -13,8 +13,10 @@ The app never confirms or delivers a bolus.
 4. Set the carbs field to the whole-gram value and read it back.
 5. Stop and tell the user to check and confirm themselves.
 
-**Fitatu, potem AAPS** runs the Fitatu job first and AAPS only if Fitatu succeeded. When the AAPS
-job fails, the message says how many grams to type by hand.
+When the AAPS job fails, the message says how many grams to type by hand. The review screen no
+longer offers a combined **Fitatu, potem AAPS** send (removed in the UX pass, see
+[03](../03-review-and-correction/intent.md)); the service can still run a Fitatu job followed by
+an AAPS job, with AAPS only if Fitatu succeeded, but nothing in the app starts that chain.
 
 ## Safety rules
 

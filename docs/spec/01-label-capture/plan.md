@@ -6,6 +6,8 @@
   - `takePicture` (`ActivityResultContracts.TakePicture`) writes to `cacheDir/photos/label.jpg`
     exposed through the `FileProvider` (`${applicationId}.files`, `res/xml/file_paths.xml`).
   - `pickPhoto` (`PickVisualMedia`, images only).
+  - `MainContent` draws the two capture buttons; `CaptureLabel` is their content (`ic_photo_camera`
+    or `ic_photo_library` at 40 dp above the text), `captureShape` their rounded-corner shape.
   - `handleIntent` reads `EXTRA_STREAM` for `ACTION_SEND` and the debug-only `debug_label` extra.
     `pendingIntent` holds the intent until `onUnlocked`.
   - `process(uri)` checks the API key, sets `busy`, then loads, stores and sends the image

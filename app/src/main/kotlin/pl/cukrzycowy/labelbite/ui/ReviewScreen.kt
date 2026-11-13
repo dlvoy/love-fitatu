@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -18,6 +20,9 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -32,8 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import pl.cukrzycowy.labelbite.R
 import pl.cukrzycowy.labelbite.automation.AapsGuard
 import pl.cukrzycowy.labelbite.automation.AutomationJob
 import pl.cukrzycowy.labelbite.data.DishCode
@@ -219,11 +227,19 @@ fun ReviewScreen(
         if (data.meal == null) Text("Nie rozpoznano posiłku z kodu, wybierz ręcznie.", color = MaterialTheme.colorScheme.error)
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton({ data.date = data.date.minusDays(1) }) { Text("◀") }
-            TextButton({ calendar = true }, modifier = Modifier.weight(1f)) {
-                Text(data.date.format(dateFormat) + if (data.date == data.today) " (dziś)" else "")
+            IconButton({ data.date = data.date.minusDays(1) }) {
+                Icon(painterResource(R.drawable.ic_chevron_left), "Poprzedni dzień")
             }
-            TextButton({ data.date = data.date.plusDays(1) }) { Text("▶") }
+            TextButton({ calendar = true }, modifier = Modifier.weight(1f)) {
+                Icon(painterResource(R.drawable.ic_calendar), null, modifier = Modifier.size(18.dp))
+                Text(
+                    data.date.format(dateFormat) + if (data.date == data.today) " (dziś)" else "",
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
+            IconButton({ data.date = data.date.plusDays(1) }) {
+                Icon(painterResource(R.drawable.ic_chevron_right), "Następny dzień")
+            }
         }
         data.labelDay?.let { Text("Dzień na etykiecie: $it", style = MaterialTheme.typography.bodySmall) }
 
@@ -232,20 +248,33 @@ fun ReviewScreen(
         val aaps = carbs?.let { AutomationJob.Aaps(settings.aapsPackage, it) }
 
         Button({ onRun(listOf(fitatu!!)) }, enabled = fitatu != null, modifier = Modifier.fillMaxWidth()) {
-            Text(if (settings.autoSave) "Dodaj do Fitatu" else "Wypełnij w Fitatu")
+            Icon(painterResource(R.drawable.logo_fitatu), null, modifier = Modifier.size(20.dp))
+            Text(if (settings.autoSave) "Dodaj do Fitatu" else "Wypełnij w Fitatu", modifier = Modifier.padding(start = 8.dp))
         }
         OutlinedButton({ onRun(listOf(aaps!!)) }, enabled = aaps != null, modifier = Modifier.fillMaxWidth()) {
-            Text(if (carbs != null) "Kalkulator bolusa AAPS ($carbs g)" else "Kalkulator bolusa AAPS")
+            Icon(painterResource(R.drawable.logo_aaps), null, modifier = Modifier.size(20.dp))
+            Text(
+                if (carbs != null) "Kalkulator bolusa AAPS ($carbs g)" else "Kalkulator bolusa AAPS",
+                modifier = Modifier.padding(start = 8.dp),
+            )
         }
-        OutlinedButton(
-            { onRun(listOf(fitatu!!, aaps!!)) },
-            enabled = fitatu != null && aaps != null,
+
+        val muted = MaterialTheme.colorScheme.outline
+        HorizontalDivider(thickness = 0.5.dp, color = muted)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Fitatu, potem AAPS") }
-        Text(
-            "W AAPS aplikacja tylko wpisuje węglowodany. Bolus zatwierdzasz samodzielnie.",
-            style = MaterialTheme.typography.bodySmall,
-        )
+        ) {
+            Icon(painterResource(R.drawable.ic_info), null, tint = muted, modifier = Modifier.size(14.dp))
+            Text(
+                "W AAPS aplikacja tylko wpisuje węglowodany. Bolus zatwierdzasz samodzielnie.",
+                style = MaterialTheme.typography.labelSmall,
+                color = muted,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+        }
     }
 }
 

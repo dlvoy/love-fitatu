@@ -10,6 +10,10 @@ state buttons in 0.4.0)
 - Model list with cache, preferred section, search and manual entry.
 - Settings grouped into cards with icons; provider and catering chosen from a menu with logos.
 
+- UX pass (unreleased): cog icon instead of the **Ustawienia** label, back arrow instead of
+  **Gotowe**, model picker as a full screen with a back arrow instead of **Anuluj**. Not yet
+  checked by hand on a device.
+
 ## Known gaps
 
 - The preferred model ids are hard-coded per provider and need updating when a provider renames or

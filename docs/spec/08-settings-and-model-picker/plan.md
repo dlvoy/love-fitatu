@@ -10,7 +10,8 @@
   (`OK` green, `NEEDED` orange, `BAD` red, `TO_CHECK` yellow); `AccessibilityButton` (also used by
   `MainActivity`) and `VersionCheckRow` are built on it.
 - `app/src/main/kotlin/pl/cukrzycowy/labelbite/ui/ModelPickerDialog.kt`: `preferredModels`,
-  `filterModels`, `canUseTypedId`, the dialog with search and manual id entry.
+  `filterModels`, `canUseTypedId`, the full-screen dialog with a top bar (back arrow, title),
+  search and manual id entry.
 - `app/src/main/kotlin/pl/cukrzycowy/labelbite/ocr/ModelCatalog.kt`: `fetchModels` and `parse` per
   provider, `encode` / `decode` for the cache (`id<TAB>name` per line).
 - `app/src/main/kotlin/pl/cukrzycowy/labelbite/data/Settings.kt`: per-provider and per-catering

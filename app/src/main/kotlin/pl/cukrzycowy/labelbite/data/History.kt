@@ -18,12 +18,7 @@ class LabelRecord(val toml: File, val data: TomlDoc) {
     val photo: File = File(toml.parentFile, toml.nameWithoutExtension + ".jpg")
 
     /** From the folder and file name, so it survives a damaged TOML. */
-    val taken: LocalDateTime = runCatching {
-        LocalDateTime.of(
-            LocalDate.parse(toml.parentFile!!.name),
-            LocalTime.parse(toml.nameWithoutExtension.take(8), History.TIME_FILE),
-        )
-    }.getOrElse { LocalDateTime.MIN }
+    val taken: LocalDateTime = History.takenOf(toml)
 
     fun section(name: String): Map<String, Any> = data[name].orEmpty()
     fun text(section: String, key: String): String? = data[section]?.get(key)?.toString()?.takeIf { it.isNotBlank() }
@@ -81,13 +76,24 @@ object History {
         return LabelRecord(file, data)
     }
 
-    /** All records, newest first. */
-    fun list(context: Context): List<LabelRecord> =
-        root(context).listFiles { f -> f.isDirectory }.orEmpty().flatMap { dir ->
-            dir.listFiles { f -> f.extension == "toml" }.orEmpty().map { file ->
-                LabelRecord(file, runCatching { Toml.parse(file.readText()) }.getOrDefault(emptyMap()))
-            }
-        }.sortedByDescending { it.taken }
+    /** When the entry behind a TOML file was taken, read from its folder and file name. */
+    fun takenOf(toml: File): LocalDateTime = runCatching {
+        LocalDateTime.of(
+            LocalDate.parse(toml.parentFile!!.name),
+            LocalTime.parse(toml.nameWithoutExtension.take(8), TIME_FILE),
+        )
+    }.getOrElse { LocalDateTime.MIN }
+
+    /** The TOML files of all entries, newest first. Lists folders only; no file is read. */
+    fun files(context: Context): List<File> =
+        root(context).listFiles { f -> f.isDirectory }.orEmpty()
+            .flatMap { dir -> dir.listFiles { f -> f.extension == "toml" }.orEmpty().asList() }
+            .sortedByDescending(::takenOf)
+
+    /** Reads the given TOML files into records, keeping their order. A damaged file gives an empty record. */
+    fun load(files: List<File>): List<LabelRecord> = files.map { file ->
+        LabelRecord(file, runCatching { Toml.parse(file.readText()) }.getOrDefault(emptyMap()))
+    }
 
     /** Deletes the photo and TOML of each record, and the day folder once it is empty. */
     fun delete(records: Collection<LabelRecord>) {
@@ -103,4 +109,8 @@ object History {
     /** Groups newest-first records into Monday-based weeks, newest week first. */
     fun <T> byWeek(items: List<T>, date: (T) -> LocalDate): List<Pair<LocalDate, List<T>>> =
         items.groupBy { weekStart(date(it)) }.toList().sortedByDescending { it.first }
+
+    /** Groups records into days, newest day first. */
+    fun <T> byDay(items: List<T>, date: (T) -> LocalDate): List<Pair<LocalDate, List<T>>> =
+        items.groupBy(date).toList().sortedByDescending { it.first }
 }

@@ -6,12 +6,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -28,12 +32,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import pl.cukrzycowy.labelbite.R
 import pl.cukrzycowy.labelbite.ocr.ImagePrep
 import java.io.File
 
@@ -95,8 +101,17 @@ fun ZoomableImageDialog(bitmap: Bitmap?, onDismiss: () -> Unit) {
                     translationY = offset.y
                 },
             )
-            TextButton(onDismiss, modifier = Modifier.align(Alignment.TopEnd).systemBarsPadding().padding(8.dp)) {
-                Text("Zamknij", color = Color.White)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .fillMaxWidth()
+                    .background(Color.Black.copy(alpha = 0.4f))
+                    .systemBarsPadding()
+                    .padding(4.dp),
+            ) {
+                IconButton(onDismiss) { Icon(painterResource(R.drawable.ic_arrow_back), "Wróć", tint = Color.White) }
+                Text("Zdjęcie etykiety", color = Color.White, style = MaterialTheme.typography.titleLarge)
             }
         }
     }
