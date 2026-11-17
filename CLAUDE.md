@@ -7,7 +7,7 @@ service. See [README.md](README.md) for the overview and build commands, and
 
 ## Specs
 
-Feature specs live in [docs/spec](docs/spec/README.md). Use them when planning:
+Feature specs live in [docs/specs](docs/specs/README.md). Use them when planning:
 
 - Before planning a change, read the intents it touches (`intent.md`, `plan.md`, `status.md`).
   Their rules, especially the Fitatu and AAPS safety rules, stay in force unless the user changes
@@ -17,4 +17,4 @@ Feature specs live in [docs/spec](docs/spec/README.md). Use them when planning:
   known gaps). Write `intent.md` and `plan.md` while planning, before writing code.
 - A change to an existing feature updates that intent's files instead.
 - Keep `status.md` current as work progresses, and add new intents to the table in
-  `docs/spec/README.md`.
+  `docs/specs/README.md`.
