@@ -10,6 +10,7 @@ import pl.cukrzycowy.labelbite.automation.AppVersions
 import pl.cukrzycowy.labelbite.automation.SteeredApp
 import pl.cukrzycowy.labelbite.automation.VersionCheck
 import pl.cukrzycowy.labelbite.automation.Format
+import pl.cukrzycowy.labelbite.automation.isMealListNode
 import pl.cukrzycowy.labelbite.data.DishCode
 import pl.cukrzycowy.labelbite.data.LabelDate
 import pl.cukrzycowy.labelbite.data.Meal
@@ -472,5 +473,17 @@ class BridgeTest {
         assertEquals("< 0,000001 USD", formatCost(0.0000002, estimated = false))
         // Entries without a cost show tokens only.
         assertEquals(listOf("Tokeny wejściowe" to "10", "Tokeny wyjściowe" to "5"), detailRows(LlmUsage(10, 5).toToml()))
+    }
+
+    @Test
+    fun fitatuMealListNodes() {
+        assertTrue(isMealListNode("planner_page_planner_supper_section_add_button"))
+        assertTrue(isMealListNode("com.fitatu.tracker:id/planner_page_planner_dinner_section_kcal"))
+        // A long meal can fill the screen with entries only; they must still identify the list.
+        assertTrue(isMealListNode("planner_page_planner_dinner_id_ec26cc92_e29b_11f1_a5c5_7d883a54fe21_entry_name_text"))
+        assertFalse(isMealListNode("planner_page_planner_week_app_bar_2026_11_17_button"))
+        assertFalse(isMealListNode("planner_page_planner_today_button"))
+        assertFalse(isMealListNode("planner_page_summary_section_kcal_value_1212_container"))
+        assertFalse(isMealListNode(null))
     }
 }

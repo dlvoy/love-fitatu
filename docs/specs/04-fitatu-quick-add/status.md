@@ -6,6 +6,9 @@
 
 - Day selection, meal lookup with safe scrolling, meal check, typed and verified fields, optional
   auto-save.
+- Meal lookup survives a meal with many products filling the screen (no section header visible)
+  and starts from the top of the list, so meals above the last scroll position are found.
+  Checked on the device with Fitatu 2026-11-17.
 
 ## Known gaps
 

@@ -8,6 +8,12 @@ Versions are tagged `vX.Y.Z` and match the app's `versionName`.
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-17
+
+### Fixed
+
+- Adding to Fitatu no longer stops with "nie znaleziono listy posiłków" when a meal with many products fills the whole screen while scrolling. The planner is also scrolled back to the top first, so a meal above the spot where Fitatu was left is found.
+
 ## [1.1.0] - 2026-11-13
 
 ### Added

@@ -111,16 +111,24 @@ class BridgeAccessibilityService : AccessibilityService() {
         }
 
         // 3. Find the meal's add button, scrolling the meal list if needed.
+        // The planner has three scrollables: the week bar, the day pager and the meal list.
+        // Only the meal list may be scrolled; scrolling the others changes the week or the day.
         val addId = "planner_page_planner_${job.meal.fitatuKey}_section_add_button"
-        var add: AccessibilityNodeInfo? = null
-        for (attempt in 0 until 8) {
-            add = waitOrNull(pkg, 1_200) { it.byId(addId) }
-            if (add != null) break
-            // The planner has three scrollables: the week bar, the day pager and the meal list.
-            // Only the meal list may be scrolled; scrolling the others changes the week or the day.
-            val mealList = root(pkg)?.let(::mealList) ?: fail("nie znaleziono listy posiłków w Fitatu")
-            if (!mealList.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) break
-            delay(700)
+        var add: AccessibilityNodeInfo? = waitOrNull(pkg, 1_200) { it.byId(addId) }
+        if (add == null) {
+            // Fitatu keeps the scroll position, so the meal may be above the visible part: start from the top.
+            for (attempt in 0 until 20) {
+                val mealList = root(pkg)?.let(::mealList) ?: fail("nie znaleziono listy posiłków w Fitatu")
+                if (!mealList.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)) break
+                delay(500)
+            }
+            for (attempt in 0 until 20) {
+                add = waitOrNull(pkg, 600) { it.byId(addId) }
+                if (add != null) break
+                val mealList = root(pkg)?.let(::mealList) ?: fail("nie znaleziono listy posiłków w Fitatu")
+                if (!mealList.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) break
+                delay(700)
+            }
         }
         // Scrolling must not have moved the planner to another day.
         if (root(pkg)?.byId(dayId)?.isSelected != true) fail("Fitatu zmieniło dzień podczas przewijania, przerwano")
@@ -267,9 +275,13 @@ class BridgeAccessibilityService : AccessibilityService() {
         if (!target.performAction(AccessibilityNodeInfo.ACTION_CLICK)) fail("kliknięcie „$what” nie powiodło się")
     }
 
-    /** The vertically scrolling meal list: the nearest scrollable ancestor of any meal section node. */
+    /**
+     * The vertically scrolling meal list: the nearest scrollable ancestor of any meal section or meal
+     * entry node. Entries count too, because a meal with many products can fill the whole screen
+     * with no section header in sight (Fitatu leaves off-screen nodes out of the tree).
+     */
     private fun mealList(root: AccessibilityNodeInfo): AccessibilityNodeInfo? {
-        val anchor = root.walk().firstOrNull { it.viewIdResourceName?.contains(F_SECTION_MARKER) == true } ?: return null
+        val anchor = root.walk().firstOrNull { isMealListNode(it.viewIdResourceName) } ?: return null
         return generateSequence(anchor.parent) { it.parent }.firstOrNull { it.isScrollable }
     }
 
@@ -281,7 +293,6 @@ class BridgeAccessibilityService : AccessibilityService() {
         private val DAY_ID = DateTimeFormatter.ofPattern("yyyy_MM_dd")
 
         private const val F_TODAY = "planner_page_planner_today_button"
-        private const val F_SECTION_MARKER = "_section_add_button"
         private const val F_SEARCH_BACK = "search_catalog_page_app_bar_back_button"
         private const val F_MEAL_SELECTOR = "search_catalog_page_app_bar_meal_selector_dropdown"
         private const val F_QUICK_ADD = "search_catalog_page_search_body_search_bottom_bar_add_quick_button"
@@ -301,6 +312,18 @@ class BridgeAccessibilityService : AccessibilityService() {
 }
 
 // Node helpers -------------------------------------------------------------
+
+/**
+ * True for the ids of nodes inside Fitatu's meal list: meal sections
+ * (`planner_page_planner_dinner_section_add_button`) and meal entries
+ * (`planner_page_planner_dinner_id_<uuid>_entry_name_text`). Week bar buttons and the summary bar
+ * below the list do not match.
+ */
+fun isMealListNode(viewId: String?): Boolean {
+    val id = viewId?.substringAfterLast('/') ?: return false
+    if (!id.startsWith("planner_page_planner_") || id.startsWith("planner_page_planner_week_app_bar_")) return false
+    return id.contains("_section_") || id.contains("_entry_")
+}
 
 fun AccessibilityNodeInfo.walk(): Sequence<AccessibilityNodeInfo> = sequence {
     val stack = ArrayDeque<AccessibilityNodeInfo>()

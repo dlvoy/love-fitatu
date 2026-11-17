@@ -11,7 +11,8 @@ in the right meal, without the user touching Fitatu.
    Fitatu was left there.
 2. Select the chosen day in the week bar. Leave it alone if it is already selected: tapping the
    selected day is not a no-op in Fitatu.
-3. Find the meal's add button, scrolling only the meal list.
+3. Find the meal's add button, scrolling only the meal list: if it is not on screen, scroll the
+   list to the top, then forward until it shows.
 4. Check that the search screen opened for the expected meal.
 5. Open quick add and type the name, kcal, fat, carbs and protein, reading each field back.
 6. With **auto-save** on (the default), tap **Zapisz** and wait for the form to close. With it off,
